@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    container_name: cockroach
+    ports:
+      - "26257:26257"  # SQL port
+      - "8080:8080"    # Admin UI
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+    command: start-single-node --insecure
+    restart: unless-stopped
+    environment:
+      - COCKROACH_DATABASE=poll_app
+    healthcheck:
+      test: ["CMD", "./cockroach", "sql", "--insecure", "--execute=SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - voting-network
+
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - DB_HOST=cockroach
+      - DB_PORT=26257
+      - DB_USER=root
+      - DB_NAME=poll_app
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+    networks:
+      - voting-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - voting-network
+    restart: unless-stopped
+
+networks:
+  voting-network:
+    driver: bridge
+
+volumes:
+  cockroach-data:
+    driver: local

@@ -10,21 +10,29 @@ DB_PORT = os.getenv("DB_PORT", "26257")
 DB_USER = os.getenv("DB_USER", "root")
 DB_NAME = os.getenv("DB_NAME", "poll_app")
 
-# URL для asyncpg (без JSON кодеков для CockroachDB)
-ASYNC_DATABASE_URL = f"postgresql+asyncpg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# URL для psycopg2 async (поддерживается CockroachDB)
+ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # URL для psycopg2 (с sslmode для Alembic)
 SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
 
-# Асинхронный движок для приложения (отключаем JSON кодеки)
+# Асинхронный движок для приложения
+# Monkey patch для CockroachDB версии
+import sqlalchemy.dialects.postgresql.base as pg_base
+original_get_server_version_info = pg_base.PGDialect._get_server_version_info
+
+def _get_server_version_info(self, connection):
+    try:
+        return original_get_server_version_info(self, connection)
+    except AssertionError:
+        # Если CockroachDB, возвращаем fake версию PostgreSQL
+        return (13, 0)
+
+pg_base.PGDialect._get_server_version_info = _get_server_version_info
+
 engine = create_async_engine(
     ASYNC_DATABASE_URL, 
-    echo=True,
-    connect_args={
-        "server_settings": {
-            "jit": "off",
-        }
-    }
+    echo=True
 )
 
 # Синхронный движок для Alembic

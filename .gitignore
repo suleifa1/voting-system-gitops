@@ -52,3 +52,43 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# JWT secrets and sensitive configs
+secrets/
+*.pem
+*.key
+*.crt
+
+# Alembic
+src/backend/alembic/versions/__pycache__/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Pytest
+.pytest_cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp

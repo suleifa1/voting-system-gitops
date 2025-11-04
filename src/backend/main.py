@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.api.auth import router as auth_router
 from src.api.polls import router as polls_router  
 from src.api.admin import router as admin_router
@@ -21,6 +22,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Добавляем CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://frontend:3000"],  # Frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Подключаем роутеры
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(polls_router, prefix="/polls", tags=["polls"])
@@ -33,3 +43,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "database": "connected"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
