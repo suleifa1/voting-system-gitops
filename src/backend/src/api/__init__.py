@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from src.database.models import auth as auth_models
 
 # Импортируем роутеры
 from .polls import router as polls_router

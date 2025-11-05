@@ -31,6 +31,14 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def create_user_token(user_id: int) -> str:
+    """Создаем токен для пользователя с стандартным временем жизни"""
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    return create_access_token(
+        data={"sub": str(user_id)}, 
+        expires_delta=access_token_expires
+    )
+
 def verify_token(token: str):
     """Проверяем JWT токен"""
     try:
