@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.auth import router as auth_router
 from src.api.polls import router as polls_router  
 from src.api.admin import router as admin_router
+from src.api.surveys import router as surveys_router
 from src.database import create_tables
 
 @asynccontextmanager
@@ -35,6 +36,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(polls_router, prefix="/polls", tags=["polls"])
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
+app.include_router(surveys_router)
 
 @app.get("/")
 async def root():

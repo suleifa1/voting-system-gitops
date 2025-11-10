@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { authService } from '@/services/auth';
 import { User } from '@/services/types';
+import PollsList from '@/components/polls/PollsList';
+import styles from './page.module.css';
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -35,30 +37,30 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загрузка...</p>
+      <div className={styles.loading}>
+        <div className={styles.loadingContent}>
+          <div className={styles.spinner}></div>
+          <p className={styles.loadingText}>Загрузка...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
+    <div className={styles.container}>
+      <nav className={styles.nav}>
+        <div className={styles.navContent}>
+          <div className={styles.navInner}>
+            <div className={styles.navLeft}>
+              <h1 className={styles.title}>
                 Система голосования
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Привет, {user?.username}!</span>
+            <div className={styles.navRight}>
+              <span className={styles.username}>Привет, {user?.username}!</span>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className={styles.logoutButton}
               >
                 Выйти
               </button>
@@ -67,35 +69,26 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Добро пожаловать в систему голосования!
+      <main className={styles.main}>
+        <div className={styles.content}>
+          {/* Приветствие */}
+          <div className={styles.welcome}>
+            <div className={styles.welcomeContent}>
+              <h2 className={styles.welcomeTitle}>
+                Добро пожаловать, {user?.username}! 👋
               </h2>
-              <p className="text-gray-600">
-                Это MVP версия системы авторизации. Здесь будут отображаться опросы и возможность голосования.
+              <p className={styles.welcomeText}>
+                Здесь вы можете просматривать доступные опросы и голосовать в них.
               </p>
-              
-              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-                <h3 className="text-sm font-medium text-blue-800">Информация о пользователе:</h3>
-                <dl className="mt-2 text-sm text-blue-700">
-                  <div>
-                    <dt className="inline">ID: </dt>
-                    <dd className="inline">{user?.id}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline">Email: </dt>
-                    <dd className="inline">{user?.email}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline">Имя пользователя: </dt>
-                    <dd className="inline">{user?.username}</dd>
-                  </div>
-                </dl>
-              </div>
             </div>
+          </div>
+
+          {/* Список опросов */}
+          <div className={styles.pollsSection}>
+            <h3 className={styles.pollsTitle}>
+              Доступные опросы
+            </h3>
+            <PollsList />
           </div>
         </div>
       </main>

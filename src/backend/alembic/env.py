@@ -14,6 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent / "src"))
 # Импортируем модели
 from src.database.connection import Base
 from src.models.user import User
+from src.models.poll import Survey, Question, QuestionOption, Answer
 
 config = context.config
 
