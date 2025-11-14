@@ -40,7 +40,7 @@ export default function Dashboard() {
       <div className={styles.loading}>
         <div className={styles.loadingContent}>
           <div className={styles.spinner}></div>
-          <p className={styles.loadingText}>Загрузка...</p>
+          <p className={styles.loadingText}>Loading...</p>
         </div>
       </div>
     );
@@ -53,16 +53,16 @@ export default function Dashboard() {
           <div className={styles.navInner}>
             <div className={styles.navLeft}>
               <h1 className={styles.title}>
-                Система голосования
+                Voting System
               </h1>
             </div>
             <div className={styles.navRight}>
-              <span className={styles.username}>Привет, {user?.username}!</span>
+              <span className={styles.username}>Hello, {user?.username}!</span>
               <button
                 onClick={handleLogout}
                 className={styles.logoutButton}
               >
-                Выйти
+                Logout
               </button>
             </div>
           </div>
@@ -71,22 +71,22 @@ export default function Dashboard() {
 
       <main className={styles.main}>
         <div className={styles.content}>
-          {/* Приветствие */}
+          {/* Welcome */}
           <div className={styles.welcome}>
             <div className={styles.welcomeContent}>
               <h2 className={styles.welcomeTitle}>
-                Добро пожаловать, {user?.username}! 👋
+                Welcome, {user?.username}! 👋
               </h2>
               <p className={styles.welcomeText}>
-                Здесь вы можете просматривать доступные опросы и голосовать в них.
+                Here you can view available surveys and vote in them.
               </p>
             </div>
           </div>
 
-          {/* Список опросов */}
+          {/* Surveys list */}
           <div className={styles.pollsSection}>
             <h3 className={styles.pollsTitle}>
-              Доступные опросы
+              Available surveys
             </h3>
             <PollsList />
           </div>

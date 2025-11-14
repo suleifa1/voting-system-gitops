@@ -17,7 +17,6 @@ const api = axios.create({
   },
 });
 
-// Добавляем токен к каждому запросу если он есть
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -26,7 +25,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Перехватываем ответы для обработки ошибок авторизации
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -42,8 +40,8 @@ api.interceptors.response.use(
 
 export const surveyApi = {
   /**
-   * Получить список всех анкет
-   * @param statusFilter - фильтр по статусу (draft, active, completed)
+   * Get list of all surveys
+   * @param statusFilter - filter by status (draft, active, completed)
    */
   async getSurveys(statusFilter?: string): Promise<SurveyListItem[]> {
     const params = statusFilter ? { status_filter: statusFilter } : {};
@@ -52,8 +50,8 @@ export const surveyApi = {
   },
 
   /**
-   * Получить полную анкету со всеми вопросами
-   * @param surveyId - ID анкеты
+   * Get full survey with all questions
+   * @param surveyId - survey ID
    */
   async getSurvey(surveyId: string): Promise<Survey> {
     const response = await api.get<Survey>(`/surveys/${surveyId}`);
@@ -61,8 +59,8 @@ export const surveyApi = {
   },
 
   /**
-   * Начать прохождение анкеты (требуется авторизация)
-   * @param surveyId - ID анкеты
+   * Start survey (requires authentication)
+   * @param surveyId - survey ID
    */
   async startSurvey(surveyId: string): Promise<SurveyStartResponse> {
     const response = await api.post<SurveyStartResponse>(`/surveys/${surveyId}/start`);
@@ -70,9 +68,9 @@ export const surveyApi = {
   },
 
   /**
-   * Отправить ответы на анкету (требуется авторизация)
-   * @param surveyId - ID анкеты
-   * @param answers - ответы пользователя
+   * Submit survey answers (requires authentication)
+   * @param surveyId - survey ID
+   * @param answers - user answers
    */
   async submitAnswers(
     surveyId: string,
@@ -86,8 +84,8 @@ export const surveyApi = {
   },
 
   /**
-   * Получить результаты анкеты
-   * @param surveyId - ID анкеты
+   * Get survey results
+   * @param surveyId - survey ID
    */
   async getSurveyResults(surveyId: string): Promise<SurveyResults> {
     const response = await api.get<SurveyResults>(`/surveys/${surveyId}/results`);

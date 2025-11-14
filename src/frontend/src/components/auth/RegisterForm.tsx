@@ -27,7 +27,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       await authService.register(formData);
       onSuccess?.();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка регистрации');
+      setError(err.response?.data?.message || 'Registration error');
     } finally {
       setIsLoading(false);
     }
@@ -41,22 +41,22 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Регистрация
+    <div style={{ width: '100%', maxWidth: '28rem', margin: '0 auto' }}>
+      <div style={{ backgroundColor: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', borderRadius: '0.5rem', padding: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', textAlign: 'center', color: '#374151', marginBottom: '1.5rem' }}>
+          Register
         </h2>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '0.25rem' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-              Имя пользователя
+            <label htmlFor="username" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>
+              Username
             </label>
             <input
               type="text"
@@ -65,13 +65,13 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ваше имя"
+              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', outline: 'none' }}
+              placeholder="Your name"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>
               Email
             </label>
             <input
@@ -81,14 +81,14 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', outline: 'none' }}
               placeholder="your@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Пароль
+            <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>
+              Password
             </label>
             <input
               type="password"
@@ -97,7 +97,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', outline: 'none' }}
               placeholder="••••••••"
             />
           </div>
@@ -105,21 +105,21 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+            style={{ width: '100%', backgroundColor: '#16a34a', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.5 : 1 }}
           >
-            {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
+            {isLoading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
         {onSwitchToLogin && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Уже есть аккаунт?{' '}
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Already have an account?{' '}
               <button
                 onClick={onSwitchToLogin}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                style={{ color: '#2563eb', fontWeight: '500', border: 'none', background: 'none', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                Войти
+                Login
               </button>
             </p>
           </div>

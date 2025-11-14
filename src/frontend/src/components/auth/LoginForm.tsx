@@ -26,7 +26,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
       await authService.login(formData);
       onSuccess?.();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка авторизации');
+      setError(err.response?.data?.message || 'Login error');
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +43,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
     <div style={{ width: '100%', maxWidth: '28rem', margin: '0 auto' }}>
       <div style={{ backgroundColor: 'white', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', borderRadius: '0.5rem', padding: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', textAlign: 'center', color: '#374151', marginBottom: '1.5rem' }}>
-          Вход в систему
+          Login
         </h2>
         
         {error && (
@@ -71,7 +71,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
 
           <div>
             <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>
-              Пароль
+              Password
             </label>
             <input
               type="password"
@@ -90,19 +90,19 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
             disabled={isLoading}
             style={{ width: '100%', backgroundColor: '#2563eb', color: 'white', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.5 : 1 }}
           >
-            {isLoading ? 'Вход...' : 'Войти'}
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         {onSwitchToRegister && (
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
             <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-              Нет аккаунта?{' '}
+              Don't have an account?{' '}
               <button
                 onClick={onSwitchToRegister}
                 style={{ color: '#2563eb', fontWeight: '500', border: 'none', background: 'none', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                Зарегистрироваться
+                Register
               </button>
             </p>
           </div>

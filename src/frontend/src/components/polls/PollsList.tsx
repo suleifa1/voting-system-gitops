@@ -80,7 +80,7 @@ export default function PollsList() {
       <div className={styles.container}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>Загрузка анкет...</p>
+          <p>Loading surveys...</p>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export default function PollsList() {
         <div className={styles.error}>
           <p>❌ {error}</p>
           <button onClick={loadSurveys} className={styles.retryButton}>
-            Попробовать снова
+            Try again
           </button>
         </div>
       </div>
@@ -101,37 +101,37 @@ export default function PollsList() {
 
   return (
     <div className={styles.container}>
-      {/* Фильтры */}
+      {/* Filters */}
       <div className={styles.filters}>
         <div className={styles.filterButtons}>
           <button
             onClick={() => setFilter('all')}
             className={getFilterButtonClass('all')}
           >
-            Все ({counts.all})
+            All ({counts.all})
           </button>
           <button
             onClick={() => setFilter('active')}
             className={getFilterButtonClass('active')}
           >
-            Активные ({counts.active})
+            Active ({counts.active})
           </button>
           <button
             onClick={() => setFilter('completed')}
             className={getFilterButtonClass('completed')}
           >
-            Завершённые ({counts.completed})
+            Completed ({counts.completed})
           </button>
           <button
             onClick={() => setFilter('draft')}
             className={getFilterButtonClass('draft')}
           >
-            Черновики ({counts.draft})
+            Drafts ({counts.draft})
           </button>
         </div>
       </div>
 
-      {/* Список опросов */}
+      {/* Surveys list */}
       {transformedPolls.length === 0 ? (
         <div className={styles.emptyState}>
           <svg
@@ -148,9 +148,9 @@ export default function PollsList() {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className={styles.emptyTitle}>Нет опросов</h3>
+          <h3 className={styles.emptyTitle}>No surveys</h3>
           <p className={styles.emptyDescription}>
-            В этой категории пока нет опросов.
+            There are no surveys in this category yet.
           </p>
         </div>
       ) : (

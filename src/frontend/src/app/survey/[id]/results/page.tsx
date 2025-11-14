@@ -38,7 +38,7 @@ export default function SurveyResultsPage() {
       <div className={styles.container}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>Загрузка результатов...</p>
+          <p>Loading results...</p>
         </div>
       </div>
     );
@@ -48,10 +48,10 @@ export default function SurveyResultsPage() {
     return (
       <div className={styles.container}>
         <div className={styles.error}>
-          <h2>❌ Ошибка</h2>
-          <p>{error || 'Результаты не найдены'}</p>
+          <h2>❌ Error</h2>
+          <p>{error || 'Results not found'}</p>
           <button onClick={() => router.push('/dashboard')} className={styles.backButton}>
-            Вернуться к списку
+            Back to list
           </button>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function SurveyResultsPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <button onClick={() => router.push('/dashboard')} className={styles.backLink}>
-          ← Назад к списку
+          ← Back to list
         </button>
         <h1 className={styles.title}>{results.survey_title}</h1>
         <div className={styles.info}>
@@ -70,14 +70,14 @@ export default function SurveyResultsPage() {
             <span className={styles.infoIcon}>👥</span>
             <div>
               <div className={styles.infoValue}>{results.total_responses}</div>
-              <div className={styles.infoLabel}>Всего ответов</div>
+              <div className={styles.infoLabel}>Total responses</div>
             </div>
           </div>
           <div className={styles.infoCard}>
             <span className={styles.infoIcon}>📋</span>
             <div>
               <div className={styles.infoValue}>{results.questions.length}</div>
-              <div className={styles.infoLabel}>Вопросов</div>
+              <div className={styles.infoLabel}>Questions</div>
             </div>
           </div>
         </div>
@@ -87,9 +87,9 @@ export default function SurveyResultsPage() {
         {results.questions.map((question, index) => (
           <div key={question.question_id} className={styles.questionBlock}>
             <div className={styles.questionHeader}>
-              <span className={styles.questionNumber}>Вопрос {index + 1}</span>
+              <span className={styles.questionNumber}>Question {index + 1}</span>
               <span className={styles.answersCount}>
-                {question.total_answers} {question.total_answers === 1 ? 'ответ' : 'ответов'}
+                {question.total_answers} {question.total_answers === 1 ? 'answer' : 'answers'}
               </span>
             </div>
             <h3 className={styles.questionText}>{question.question_text}</h3>
@@ -104,7 +104,7 @@ export default function SurveyResultsPage() {
                     <div className={styles.optionHeader}>
                       <span className={styles.optionText}>{option.option_text}</span>
                       <div className={styles.optionStats}>
-                        <span className={styles.votesCount}>{option.votes_count} голосов</span>
+                        <span className={styles.votesCount}>{option.votes_count} votes</span>
                         <span className={`${styles.percentage} ${isLeading ? styles.leading : ''}`}>
                           {percentage.toFixed(1)}%
                         </span>
@@ -126,7 +126,7 @@ export default function SurveyResultsPage() {
 
       <div className={styles.actions}>
         <button onClick={() => router.push('/dashboard')} className={styles.backButton}>
-          Вернуться к списку анкет
+          Back to surveys list
         </button>
       </div>
     </div>

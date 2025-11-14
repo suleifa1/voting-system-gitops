@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f3f4f6;
   padding: 2rem;
 }
 
@@ -43,7 +43,7 @@
 
 .backButton,
 .backLink {
-  background: #667eea;
+  background: #2563eb;
   color: white;
   padding: 0.75rem 2rem;
   border: none;
@@ -58,9 +58,9 @@
 
 .backButton:hover,
 .backLink:hover {
-  background: #5568d3;
+  background: #1d4ed8;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .header {
@@ -69,7 +69,8 @@
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
 
 .backLink {
@@ -95,9 +96,9 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f9fafb;
   border-radius: 10px;
-  color: white;
+  border: 1px solid #e5e7eb;
 }
 
 .infoIcon {
@@ -107,11 +108,12 @@
 .infoValue {
   font-size: 2rem;
   font-weight: 700;
+  color: #111827;
 }
 
 .infoLabel {
   font-size: 0.9rem;
-  opacity: 0.9;
+  color: #6b7280;
 }
 
 .results {
@@ -135,7 +137,7 @@
 }
 
 .questionNumber {
-  background: #667eea;
+  background: #2563eb;
   color: white;
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -213,14 +215,8 @@
 }
 
 .percentage.leading {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  background: #10b981;
   color: white;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
 }
 
 .progressBar {
@@ -234,14 +230,14 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: #2563eb;
   border-radius: 10px;
   transition: width 0.8s ease-out;
   animation: fillBar 1s ease-out;
 }
 
 .progressFill.leadingBar {
-  background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+  background: #10b981;
 }
 
 @keyframes fillBar {

@@ -35,9 +35,9 @@ export default function SurveyPage() {
       const data = await surveyApi.getSurvey(surveyId);
       setSurvey(data);
 
-      // Проверяем статус анкеты
+      // Check survey status
       if (data.status !== 'active') {
-        setError(`Анкета недоступна для голосования (статус: ${data.status})`);
+        setError(`Survey is not available for voting (status: ${data.status})`);
         setTimeout(() => {
           router.push(`/survey/${surveyId}/results`);
         }, 2000);
@@ -92,7 +92,7 @@ export default function SurveyPage() {
     );
 
     if (unanswered && unanswered.length > 0) {
-      alert(`Пожалуйста, ответьте на все вопросы. Осталось: ${unanswered.length}`);
+      alert(`Please answer all questions. Remaining: ${unanswered.length}`);
       return;
     }
 
@@ -104,9 +104,9 @@ export default function SurveyPage() {
       try {
         await surveyApi.startSurvey(surveyId);
       } catch (startErr: any) {
-        // Если пользователь уже прошел анкету - показываем результаты
+        // If user already completed the survey - show results
         if (startErr.response?.data?.detail?.includes('already completed')) {
-          alert('Вы уже прошли эту анкету. Показываем результаты.');
+          alert('You have already completed this survey. Showing results.');
           router.push(`/survey/${surveyId}/results`);
           return;
         }
@@ -140,7 +140,7 @@ export default function SurveyPage() {
       <div className={styles.container}>
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
-          <p>Загрузка анкеты...</p>
+          <p>Loading survey...</p>
         </div>
       </div>
     );
@@ -150,13 +150,13 @@ export default function SurveyPage() {
     return (
       <div className={styles.container}>
         <div className={styles.error}>
-          <h2>❌ Ошибка</h2>
+          <h2>❌ Error</h2>
           <p>{error}</p>
           {error.includes('already completed') && (
-            <p className={styles.redirectMessage}>Переход к результатам...</p>
+            <p className={styles.redirectMessage}>Redirecting to results...</p>
           )}
           <button onClick={() => router.push('/dashboard')} className={styles.backButton}>
-            Вернуться к списку
+            Back to list
           </button>
         </div>
       </div>
@@ -171,13 +171,13 @@ export default function SurveyPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <button onClick={() => router.push('/dashboard')} className={styles.backLink}>
-          ← Назад к списку
+          ← Back to list
         </button>
         <h1 className={styles.title}>{survey.title}</h1>
         {survey.description && <p className={styles.description}>{survey.description}</p>}
         <div className={styles.info}>
-          <span>📋 Вопросов: {survey.questions?.length || 0}</span>
-          <span>👥 Прошли: {survey.responses_count}</span>
+          <span>📋 Questions: {survey.questions?.length || 0}</span>
+          <span>👥 Completed: {survey.responses_count}</span>
         </div>
       </div>
 
@@ -185,9 +185,9 @@ export default function SurveyPage() {
         {survey.questions?.map((question, index) => (
           <div key={question.id} className={styles.questionBlock}>
             <div className={styles.questionHeader}>
-              <span className={styles.questionNumber}>Вопрос {index + 1}</span>
+              <span className={styles.questionNumber}>Question {index + 1}</span>
               {question.allow_multiple_answers && (
-                <span className={styles.multipleLabel}>Можно выбрать несколько</span>
+                <span className={styles.multipleLabel}>Multiple choice</span>
               )}
             </div>
             <h3 className={styles.questionText}>{question.question_text}</h3>
@@ -218,7 +218,7 @@ export default function SurveyPage() {
 
         <div className={styles.submitSection}>
           <button type="submit" disabled={submitting} className={styles.submitButton}>
-            {submitting ? 'Отправка...' : 'Отправить ответы'}
+            {submitting ? 'Submitting...' : 'Submit answers'}
           </button>
         </div>
       </form>
