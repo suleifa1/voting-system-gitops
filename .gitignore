@@ -21,6 +21,9 @@ wheels/
 *.egg
 MANIFEST
 
+# README files
+*.md
+
 # Virtual environments
 venv/
 env/
