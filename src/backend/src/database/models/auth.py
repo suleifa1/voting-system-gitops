@@ -15,20 +15,16 @@ async def get_user( user_id: int, db: AsyncSession  ):
     return user
 
 async def register_user(user_data: UserCreate, db: AsyncSession):
-    """Регистрация нового пользователя"""
     
     try:
-        # Проверяем, существует ли пользователь с таким email
         result = await db.execute(select(User).where(User.email == user_data.email))
         if result.scalar_one_or_none():
             return {"error": -6, "message": "Email already registered"}
         
-        # Проверяем, существует ли пользователь с таким username
         result = await db.execute(select(User).where(User.username == user_data.username))
         if result.scalar_one_or_none():
             return {"error": -7, "message": "Username already taken"}
 
-        # Создаем нового пользователя
         hashed_password = get_password_hash(user_data.password)
         db_user = User(
             email=user_data.email,

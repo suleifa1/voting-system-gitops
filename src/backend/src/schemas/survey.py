@@ -39,7 +39,6 @@ class SurveyBase(BaseModel):
 
 
 class SurveyListResponse(SurveyBase):
-    """Краткая информация об анкете для списка"""
     id: UUID
     status: str
     created_at: datetime

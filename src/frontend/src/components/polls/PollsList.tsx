@@ -18,13 +18,12 @@ export default function PollsList() {
 
   useEffect(() => {
     loadSurveys();
-  }, []); // Загружаем только один раз при монтировании
+  }, []); 
 
   const loadSurveys = async () => {
     try {
       setLoading(true);
       setError(null);
-      // Загружаем ВСЕ анкеты без фильтра
       const data = await surveyApi.getSurveys();
       setSurveys(data);
     } catch (err: any) {
@@ -43,12 +42,11 @@ export default function PollsList() {
     router.push(`/survey/${surveyId}/results`);
   };
 
-  // Фильтруем анкеты на клиенте
   const filteredSurveys = filter === 'all' 
     ? surveys 
     : surveys.filter(s => s.status === filter);
 
-  // Преобразуем отфильтрованные данные backend в формат компонента PollCard
+  //backend data -> PollCard
   const transformedPolls = filteredSurveys.map(survey => ({
     id: survey.id,
     title: survey.title,

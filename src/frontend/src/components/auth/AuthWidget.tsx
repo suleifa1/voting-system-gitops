@@ -15,7 +15,6 @@ export default function AuthWidget({ onAuthSuccess }: AuthWidgetProps) {
 
   const handleAuthSuccess = () => {
     onAuthSuccess?.();
-    // Перенаправляем на dashboard после успешной авторизации
     window.location.href = '/dashboard';
   };
 

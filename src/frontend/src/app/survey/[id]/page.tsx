@@ -31,11 +31,9 @@ export default function SurveyPage() {
       setLoading(true);
       setError(null);
 
-      // Просто загружаем полную анкету с вопросами (БЕЗ startSurvey)
       const data = await surveyApi.getSurvey(surveyId);
       setSurvey(data);
 
-      // Check survey status
       if (data.status !== 'active') {
         setError(`Survey is not available for voting (status: ${data.status})`);
         setTimeout(() => {
@@ -44,7 +42,6 @@ export default function SurveyPage() {
         return;
       }
 
-      // Инициализируем пустые ответы
       const initialAnswers = new Map<string, string[]>();
       data.questions?.forEach((question) => {
         initialAnswers.set(question.id, []);
@@ -65,7 +62,6 @@ export default function SurveyPage() {
       const currentAnswers = newAnswers.get(questionId) || [];
 
       if (allowMultiple) {
-        // Множественный выбор - toggle checkbox
         if (currentAnswers.includes(optionId)) {
           newAnswers.set(
             questionId,
@@ -75,7 +71,6 @@ export default function SurveyPage() {
           newAnswers.set(questionId, [...currentAnswers, optionId]);
         }
       } else {
-        // Одиночный выбор - radio button
         newAnswers.set(questionId, [optionId]);
       }
 
@@ -86,7 +81,6 @@ export default function SurveyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Валидация - проверяем что на все вопросы ответили
     const unanswered = survey?.questions?.filter(
       (q) => !answers.get(q.id) || answers.get(q.id)!.length === 0
     );
@@ -100,7 +94,6 @@ export default function SurveyPage() {
       setSubmitting(true);
       setError(null);
 
-      // Сначала вызываем startSurvey
       try {
         await surveyApi.startSurvey(surveyId);
       } catch (startErr: any) {
@@ -113,7 +106,6 @@ export default function SurveyPage() {
         throw startErr;
       }
 
-      // Формируем ответы для отправки
       const answersArray: AnswerSubmit[] = Array.from(answers.entries()).map(
         ([question_id, option_ids]) => ({
           question_id,
@@ -126,7 +118,6 @@ export default function SurveyPage() {
         answers: answersArray,
       });
 
-      // Переход к результатам
       router.push(`/survey/${surveyId}/results`);
     } catch (err: any) {
       console.error('Error submitting answers:', err);

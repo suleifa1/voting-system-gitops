@@ -31,11 +31,7 @@ async def get_surveys_list(
     status_filter: str = None,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Получить список всех анкет
-    
-    - **status_filter**: фильтр по статусу (draft, active, completed)
-    """
+
     surveys = await get_all_surveys(db, status_filter)
     return surveys
 
@@ -45,11 +41,7 @@ async def get_survey_detail(
     survey_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Получить полную анкету со всеми вопросами и вариантами ответов
-    
-    - **survey_id**: ID анкеты
-    """
+ 
     survey = await get_survey_by_id(db, survey_id, include_questions=True)
     
     if not survey:
@@ -67,12 +59,7 @@ async def start_survey(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Начать прохождение анкеты (требуется авторизация)
-    
-    - **survey_id**: ID анкеты
-    """
-    # Проверяем существование анкеты
+
     survey = await get_survey_by_id(db, survey_id)
     
     if not survey:
@@ -87,7 +74,7 @@ async def start_survey(
             detail=f"Survey is not active (current status: {survey.status})"
         )
     
-    # Проверяем, не прошёл ли пользователь уже эту анкету
+
     if await check_user_completed_survey(db, survey_id, current_user.id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,19 +95,13 @@ async def submit_survey_answers(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Отправить ответы на анкету (требуется авторизация)
-    
-    - **survey_id**: ID анкеты
-    - **answers_data**: ответы пользователя на все вопросы
-    """
+
     if answers_data.survey_id != survey_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Survey ID in path and body do not match"
         )
     
-    # Преобразуем Pydantic модели в словари для функции БД
     answers_list = [
         {
             "question_id": answer.question_id,
@@ -129,10 +110,8 @@ async def submit_survey_answers(
         for answer in answers_data.answers
     ]
     
-    # Сохраняем ответы через функцию БД (используем current_user.id)
     result = await save_survey_answers(db, survey_id, current_user.id, answers_list)
     
-    # Обрабатываем ошибки
     if result["error"] == -1:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -171,11 +150,7 @@ async def get_survey_results_endpoint(
     survey_id: UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Получить результаты анкеты
-    
-    - **survey_id**: ID анкеты
-    """
+  
     results = await db_get_survey_results(db, survey_id)
     
     if not results:

@@ -37,7 +37,7 @@ async def get_current_user(token: str = Depends(security), db: AsyncSession = De
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     """Регистрация нового пользователя"""
     
-    # Проверяем, существует ли пользователь с таким email
+    
     result = await register_user(user_data, db)
     if result.get("error") == -7:
         raise HTTPException(
@@ -49,7 +49,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    elif result.get("error") == -1:  # Добавьте эту обработку
+    elif result.get("error") == -1:  
         raise HTTPException(status_code=500, detail="Database error occurred")
     elif result.get("error") == 0:
         db_user_id = result.get("user")
@@ -60,7 +60,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="User registration failed"
         )
 
-    # Создаем токен
+    
     access_token = create_user_token(db_user_id)
 
     return {"access_token": access_token, "token_type": "bearer"}
@@ -74,7 +74,7 @@ async def login(user_credentials: UserLogin, db: AsyncSession = Depends(get_db))
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    elif result.get("error") != 0:  # Обрабатываем любые другие ошибки
+    elif result.get("error") != 0: 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server-side authentication failed"

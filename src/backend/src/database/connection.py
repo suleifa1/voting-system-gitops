@@ -4,7 +4,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Базовые параметры подключения
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "26257")
 DB_USER = os.getenv("DB_USER", "root")
@@ -16,8 +15,7 @@ ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NA
 # URL для psycopg2 (с sslmode для Alembic)
 SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
 
-# Асинхронный движок для приложения
-# Monkey patch для CockroachDB версии
+
 import sqlalchemy.dialects.postgresql.base as pg_base
 original_get_server_version_info = pg_base.PGDialect._get_server_version_info
 
@@ -25,7 +23,6 @@ def _get_server_version_info(self, connection):
     try:
         return original_get_server_version_info(self, connection)
     except AssertionError:
-        # Если CockroachDB, возвращаем fake версию PostgreSQL
         return (13, 0)
 
 pg_base.PGDialect._get_server_version_info = _get_server_version_info
@@ -35,18 +32,14 @@ engine = create_async_engine(
     echo=True
 )
 
-# Синхронный движок для Alembic
 sync_engine = create_engine(SYNC_DATABASE_URL, echo=True)
 
-# Создаем сессию
 AsyncSessionLocal = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
 
-# Базовый класс для моделей
 Base = declarative_base()
 
-# Dependency для получения сессии
 async def get_db():
     async with AsyncSessionLocal() as session:
         try:
