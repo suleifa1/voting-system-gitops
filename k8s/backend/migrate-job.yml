@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-migrate
+  namespace: voting-system
+spec:
+  ttlSecondsAfterFinished: 100  # Удалить Job через 100 сек после завершения
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrate
+        image: ghcr.io/suleifa1/backend:latest
+        command: ["alembic", "upgrade", "head"]
+        envFrom:
+        - configMapRef:
+            name: voting-app-config
+        - secretRef:
+            name: voting-app-secrets
+        env:
+        - name: DB_HOST
+          value: "cockroachdb"

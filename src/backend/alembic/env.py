@@ -1,6 +1,7 @@
 # filepath: /Users/fedorauser/Desktop/bakalarka/poll_app/voting-system-gitops/src/backend/alembic/env.py
 from logging.config import fileConfig
 import sys
+import os
 from pathlib import Path
 
 from sqlalchemy import engine_from_config
@@ -17,6 +18,17 @@ from src.models.user import User
 from src.models.poll import Survey, Question, QuestionOption, Answer
 
 config = context.config
+
+# Читаем DATABASE_URL из переменных окружения если доступен
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "26257")
+DB_USER = os.getenv("DB_USER", "root")
+DB_NAME = os.getenv("DB_NAME", "poll_app")
+DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
+
+# Переопределяем sqlalchemy.url из переменных окружения
+if DATABASE_URL:
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
