@@ -26,6 +26,8 @@ COPY . .
 # Set production environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# API URL для Ingress
+ENV NEXT_PUBLIC_API_URL=/api
 
 # Build Next.js application
 RUN npm run build
