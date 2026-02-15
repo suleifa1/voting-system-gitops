@@ -8,8 +8,8 @@ services:
     image: cockroachdb/cockroach:latest
     container_name: cockroach
     ports:
-      - "26257:26257"  # SQL port
-      - "8080:8080"    # Admin UI
+      - "26257:26257"  
+      - "8080:8080"    
     volumes:
       - cockroach-data:/cockroach/cockroach-data
     command: start-single-node --insecure

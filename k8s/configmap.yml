@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: voting-app-config
+  namespace: voting-system
+data:
+  # Python
+  PYTHONPATH: "/app"
+  
+  # Database
+  DB_HOST: "cockroachdb"
+  DB_PORT: "26257"
+  DB_USER: "root"
+  DB_NAME: "poll_app"
+  
+  # Frontend
+  NODE_ENV: "production"
+  NEXT_PUBLIC_API_URL: ""
+  
+  # CockroachDB
+  COCKROACH_DATABASE: "poll_app"

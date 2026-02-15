@@ -8,6 +8,17 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      initContainers:
+      # Создаем базу данных если не существует
+      - name: create-database
+        image: cockroachdb/cockroach:latest
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Creating database if not exists..."
+            ./cockroach sql --insecure --host=cockroachdb --execute="CREATE DATABASE IF NOT EXISTS poll_app;"
+            echo "Database ready!"
       containers:
       - name: migrate
         image: ghcr.io/suleifa1/backend:latest
