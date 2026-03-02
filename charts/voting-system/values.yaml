@@ -177,3 +177,8 @@ migrateJob:
     pullPolicy: Always
   restartPolicy: OnFailure
   backoffLimit: 3
+
+# SealedSecret configuration (disabled by default, enable in environment-specific values)
+sealedSecret:
+  enabled: false
+  encryptedSecretKey: ""

@@ -65,5 +65,11 @@ ingress:
   #     hosts:
   #       - voting.local
 
+# Use regular Secret (placeholder) - will be overridden by SealedSecret
 secret:
-  SECRET_KEY: "CHANGE_THIS_IN_PRODUCTION_USE_SEALED_SECRETS"
+  SECRET_KEY: "PLACEHOLDER_OVERRIDDEN_BY_SEALED_SECRET"
+
+# SealedSecret configuration for production
+sealedSecret:
+  enabled: true
+  encryptedSecretKey: "AgB3E4Z/nGTWOCI7K174k+Llf3gkaFmMY2kuQ7Vanv3iXzTiJrWoOCx37GBR00n19RQGE6jGhHt0RFmPsKTmoN6OkKeCTcXL6iLgJksCsdybhN+wqlOUT7356wviE9OCNzXpi3LOoNohz4DlmC5p2XUaAjTZoejHfgSkCcB1rQ/t1ebMde3vFoE2Zz1FMYIyzAYPP7zaiBQpGseo12yE01DvTjzeGmMhuFr4WxlwgSKhSxmwiTTpDr5jaECx2UokVekyjoav8eBWxYWgZt49EHp+rOTVLG1SzMoLtep4OG5VbJVE5rjxZVbXhPLgO/yV79l4UAK7Fo6h7DLp3n4Jd/KzSHZM7K4l9paj9jrPlqD3qi1aiqvXGXOosumijWgZ1Lxg+OgsKwE6NR1AiEV8t1fsXKQzLAjn8CFmMhiiHMrRTRuKF9A/I3OgktPdnJAi/92Fdih9St7tMmRnHuQpCsM+juM/8KjjcdjqV65abdrIphsOUwoJu2TkhgXTyqgPyPEhBXSK3XP74W4AK6FNn5XzbHwwyUKra1qZFqMuzBCTyb3U5nPj99o+nR0/3pAT3pyKAmQlKmH+s0i397StQmABr5FiCszCMt00vvchmKnKyg9vWEii4B4kwxythSfzi8m8npZfWJNqn/U5ccNWeilDxiJmcr3Q81bkAWawfwEnrzJU+o3mg7OrtqnZgB80wN/zmla1kLYnEKKgxncUBQo0aFKXDYq+fLgGKQ/i7w7/bC+Alhng2cMn0Z/fqfp59FWvBqkizKhred+8CkHqwPVcjhdzsWA="
