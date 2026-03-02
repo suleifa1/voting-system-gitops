@@ -1,0 +1,26 @@
+{{- if .Values.cockroachdb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cockroachdb.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.cockroachdb.name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.cockroachdb.service.type }}
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - port: {{ .Values.cockroachdb.service.grpcPort }}
+    targetPort: {{ .Values.cockroachdb.service.grpcPort }}
+    protocol: TCP
+    name: grpc
+  - port: {{ .Values.cockroachdb.service.httpPort }}
+    targetPort: {{ .Values.cockroachdb.service.httpPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ .Values.cockroachdb.name }}
+    release: {{ .Release.Name }}
+{{- end }}

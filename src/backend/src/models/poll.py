@@ -25,7 +25,7 @@ class Survey(Base):
     # Relationships
     questions = relationship("Question", back_populates="survey", cascade="all, delete-orphan")
     
-    # Индексы
+    # индексы
     __table_args__ = (
         Index('ix_surveys_status', 'status'),
         Index('ix_surveys_created_by', 'created_by'),

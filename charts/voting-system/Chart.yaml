@@ -1,0 +1,14 @@
+apiVersion: v2
+name: voting-system
+description: A Helm chart for Voting System with Backend, Frontend, and CockroachDB
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - voting
+  - poll
+  - fastapi
+  - nextjs
+  - cockroachdb
+maintainers:
+  - name: suleifa1

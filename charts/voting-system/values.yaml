@@ -1,0 +1,179 @@
+# Default values for voting-system
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global settings
+global:
+  namespace: voting-system
+
+# Backend configuration
+backend:
+  enabled: true
+  name: backend
+  replicaCount: 2
+  
+  image:
+    repository: ghcr.io/suleifa1/backend
+    tag: latest
+    pullPolicy: Always
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  livenessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  
+  env:
+    PYTHONPATH: "/app"
+
+# Frontend configuration
+frontend:
+  enabled: true
+  name: frontend
+  replicaCount: 2
+  
+  image:
+    repository: ghcr.io/suleifa1/frontend
+    tag: latest
+    pullPolicy: Always
+  
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  livenessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  
+  env:
+    NODE_ENV: "production"
+    NEXT_PUBLIC_API_URL: ""
+
+# CockroachDB configuration
+cockroachdb:
+  enabled: true
+  name: cockroachdb
+  replicaCount: 1
+  
+  image:
+    repository: cockroachdb/cockroach
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    grpcPort: 26257
+    httpPort: 8080
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""  # Use default storage class
+    accessMode: ReadWriteOnce
+  
+  env:
+    COCKROACH_CHANNEL: "kubernetes-insecure"
+  
+  database:
+    name: poll_app
+    user: root
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: ""
+  
+  # NodePort service for Ingress Controller
+  nodePort:
+    enabled: true
+    httpPort: 30080
+    httpsPort: 30443
+  
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  
+  hosts:
+    - host: voting.local
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+  
+  tls: []
+  #  - secretName: voting-tls
+  #    hosts:
+  #      - voting.local
+
+# ConfigMap data
+configMap:
+  DB_HOST: "cockroachdb"
+  DB_PORT: "26257"
+  DB_USER: "root"
+  DB_NAME: "poll_app"
+  COCKROACH_DATABASE: "poll_app"
+
+# Secret data (base values - override in environment-specific files)
+# WARNING: These are PLACEHOLDER values. Override with real secrets via:
+# - Sealed Secrets (recommended for GitOps)
+# - External Secrets Operator
+# - Manual kubectl create secret
+secret:
+  SECRET_KEY: "PLACEHOLDER_OVERRIDE_THIS_VALUE"
+
+# Migrate job
+migrateJob:
+  enabled: true
+  image:
+    repository: ghcr.io/suleifa1/backend
+    tag: latest
+    pullPolicy: Always
+  restartPolicy: OnFailure
+  backoffLimit: 3

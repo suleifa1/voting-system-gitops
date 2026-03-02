@@ -97,3 +97,7 @@ tmp/
 temp/
 *.tmp
 *.temp.env.example
+
+# Sensitive config files (SSH keys, kubeconfig, VPN config)
+config/
+!config/README.md
