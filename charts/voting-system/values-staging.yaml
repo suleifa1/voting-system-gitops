@@ -8,14 +8,14 @@ backend:
   replicaCount: 2
   
   image:
-    tag: latest
+    tag: staging  # Staging-specific tag
     pullPolicy: Always
 
 frontend:
   replicaCount: 2
   
   image:
-    tag: latest
+    tag: staging  # Staging-specific tag
     pullPolicy: Always
 
 cockroachdb:
