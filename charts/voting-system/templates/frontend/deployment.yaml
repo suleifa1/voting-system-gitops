@@ -1,0 +1,56 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.frontend.name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Values.frontend.name }}
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.frontend.service.targetPort }}
+          name: http
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config
+        env:
+        - name: NODE_ENV
+          value: {{ .Values.frontend.env.NODE_ENV | quote }}
+        - name: NEXT_PUBLIC_API_URL
+          value: {{ .Values.frontend.env.NEXT_PUBLIC_API_URL | quote }}
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+        {{- if .Values.frontend.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.frontend.livenessProbe.path }}
+            port: {{ .Values.frontend.service.targetPort }}
+          initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
+        {{- end }}
+        {{- if .Values.frontend.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.frontend.readinessProbe.path }}
+            port: {{ .Values.frontend.service.targetPort }}
+          initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+        {{- end }}
+{{- end }}

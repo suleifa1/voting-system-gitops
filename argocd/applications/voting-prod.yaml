@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: voting-system-prod
+  namespace: argocd
+  labels:
+    environment: prod
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/suleifa1/voting-system-gitops
+    targetRevision: main  
+    path: charts/voting-system
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  
+  syncPolicy:
+    automated:
+      prune: false      
+      selfHeal: false   
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  revisionHistoryLimit: 10

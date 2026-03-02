@@ -1,0 +1,69 @@
+# Production environment values
+# Override default values for production environment
+
+global:
+  namespace: prod
+
+backend:
+  replicaCount: 3  # More replicas for production
+  
+  image:
+    tag: stable  # Use stable tag in production
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+frontend:
+  replicaCount: 3  # More replicas for production
+  
+  image:
+    tag: stable  # Use stable tag in production
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+cockroachdb:
+  replicaCount: 3  # Cluster mode for production
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  persistence:
+    size: 10Gi
+
+ingress:
+  hosts:
+    - host: voting.local  # Production domain
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+  
+  # Enable TLS in production
+  # tls:
+  #   - secretName: voting-tls
+  #     hosts:
+  #       - voting.local
+
+secret:
+  SECRET_KEY: "CHANGE_THIS_IN_PRODUCTION_USE_SEALED_SECRETS"

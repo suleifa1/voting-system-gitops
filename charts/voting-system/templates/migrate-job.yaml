@@ -1,0 +1,42 @@
+{{- if .Values.migrateJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-migrate
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: migrate
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: {{ .Values.migrateJob.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app: migrate
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: {{ .Values.migrateJob.restartPolicy }}
+      containers:
+      - name: migrate
+        image: "{{ .Values.migrateJob.image.repository }}:{{ .Values.migrateJob.image.tag }}"
+        imagePullPolicy: {{ .Values.migrateJob.image.pullPolicy }}
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "Waiting for database..."
+            sleep 10
+            echo "Running migrations..."
+            alembic upgrade head
+            echo "Migrations completed!"
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config
+        - secretRef:
+            name: {{ .Release.Name }}-secret
+{{- end }}
