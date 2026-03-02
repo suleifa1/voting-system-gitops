@@ -31,6 +31,6 @@ spec:
             echo "Waiting for CockroachDB to be ready..."
             sleep 15
             echo "Creating database if not exists..."
-            cockroach sql --insecure --host={{ .Values.cockroachdb.service.name }} --execute="CREATE DATABASE IF NOT EXISTS {{ .Values.cockroachdb.database.name }};"
+            cockroach sql --insecure --host={{ .Values.cockroachdb.name }} --execute="CREATE DATABASE IF NOT EXISTS {{ .Values.cockroachdb.database.name }};"
             echo "Database {{ .Values.cockroachdb.database.name }} is ready!"
 {{- end }}
