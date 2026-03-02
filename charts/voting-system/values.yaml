@@ -168,6 +168,10 @@ configMap:
 secret:
   SECRET_KEY: "PLACEHOLDER_OVERRIDE_THIS_VALUE"
 
+# Init DB job (creates database before migrations)
+initDbJob:
+  enabled: true
+
 # Migrate job
 migrateJob:
   enabled: true
