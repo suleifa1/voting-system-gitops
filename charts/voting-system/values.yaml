@@ -125,7 +125,7 @@ cockroachdb:
 # Ingress configuration
 ingress:
   enabled: true
-  className: ""
+  className: "nginx"
   
   # NodePort service for Ingress Controller
   nodePort:
