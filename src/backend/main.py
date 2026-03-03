@@ -20,7 +20,8 @@ app = FastAPI(
     title="Poll App API",
     description="Voting System API",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    root_path="/api"  # Add root path for reverse proxy
 )
 
 # Добавляем CORS middleware
@@ -44,7 +45,23 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "database": "connected"}
+    """Health check endpoint with database connectivity test"""
+    from src.database.connection import get_db
+    from sqlalchemy import text
+    
+    db_status = "unknown"
+    try:
+        db = next(get_db())
+        # Test database connection
+        db.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"disconnected: {str(e)}"
+    
+    return {
+        "status": "healthy" if db_status == "connected" else "unhealthy",
+        "database": db_status
+    }
 
 if __name__ == "__main__":
     import uvicorn

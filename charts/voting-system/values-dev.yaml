@@ -55,8 +55,8 @@ ingress:
   hosts:
     - host: dev.voting.local
       paths:
-        - path: /api(/|$)(.*)
-          pathType: ImplementationSpecific
+        - path: /api
+          pathType: Prefix
           backend: backend
         - path: /
           pathType: Prefix
