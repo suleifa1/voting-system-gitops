@@ -245,7 +245,7 @@ jobs:
   # =====================================
 
   # =====================================
-  # JOB 5: Production Notification
+  # JOB 6: Production Notification
   # =====================================
   prod-notification:
     name: Prod Deployment Notification
