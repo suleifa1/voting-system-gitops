@@ -3,6 +3,7 @@ Pytest configuration and fixtures
 """
 import sys
 from pathlib import Path
+import os
 
 # Add the backend directory to Python path
 backend_dir = Path(__file__).parent.parent
@@ -15,8 +16,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from main import app
 from src.database.connection import Base, get_db
 
-# Test database URL (используем in-memory или отдельную тестовую БД)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Test database URL - use PostgreSQL from environment or default test DB
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL",
+    "postgresql+asyncpg://test_user:test_pass@localhost:5432/test_db"
+)
 
 @pytest.fixture(scope="session")
 def event_loop():
