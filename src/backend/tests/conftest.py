@@ -13,7 +13,7 @@ import asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from src.main import app
+from main import app
 from src.database.connection import Base, get_db
 
 # Test database URL (используем in-memory или отдельную тестовую БД)
