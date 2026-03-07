@@ -11,6 +11,11 @@ on:
     paths:
       - 'src/backend/**'
 
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/backend
