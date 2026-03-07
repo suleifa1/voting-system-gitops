@@ -7,6 +7,8 @@ from src.api.admin import router as admin_router
 from src.api.surveys import router as surveys_router
 from src.database import create_tables
 
+# CI/CD Pipeline Test
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
