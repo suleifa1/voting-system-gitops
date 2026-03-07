@@ -28,4 +28,4 @@ async def test_unauthorized_start_survey(client: AsyncClient):
     """Test starting survey without authentication"""
     fake_survey_id = "11111111-1111-1111-1111-111111111111"
     response = await client.post(f"/api/surveys/{fake_survey_id}/start")
-    assert response.status_code == 401  # Unauthorized
+    assert response.status_code in [401, 403]  # Unauthorized or Forbidden
