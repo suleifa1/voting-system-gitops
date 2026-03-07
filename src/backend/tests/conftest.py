@@ -74,7 +74,7 @@ async def authenticated_client(client):
         "username": "testuser",
         "password": "testpassword123"
     }
-    response = await client.post("/auth/register", json=register_data)
+    response = await client.post("/api/auth/register", json=register_data)
     assert response.status_code == 200
     token = response.json()["access_token"]
     

@@ -12,7 +12,7 @@ async def test_register_user(client: AsyncClient):
         "username": "newuser",
         "password": "password123"
     }
-    response = await client.post("/auth/register", json=user_data)
+    response = await client.post("/api/auth/register", json=user_data)
     assert response.status_code == 200
     data = response.json()
     assert "access_token" in data
@@ -28,12 +28,12 @@ async def test_register_duplicate_email(client: AsyncClient):
     }
     
     # First registration
-    response1 = await client.post("/auth/register", json=user_data)
+    response1 = await client.post("/api/auth/register", json=user_data)
     assert response1.status_code == 200
     
     # Second registration with same email
     user_data["username"] = "user2"
-    response2 = await client.post("/auth/register", json=user_data)
+    response2 = await client.post("/api/auth/register", json=user_data)
     assert response2.status_code == 400
     assert "Email already registered" in response2.json()["detail"]
 
@@ -46,14 +46,14 @@ async def test_login_success(client: AsyncClient):
         "username": "loginuser",
         "password": "password123"
     }
-    await client.post("/auth/register", json=register_data)
+    await client.post("/api/auth/register", json=register_data)
     
     # Login
     login_data = {
         "email": "login@example.com",
         "password": "password123"
     }
-    response = await client.post("/auth/login", json=login_data)
+    response = await client.post("/api/auth/login", json=login_data)
     assert response.status_code == 200
     data = response.json()
     assert "access_token" in data
@@ -67,20 +67,20 @@ async def test_login_wrong_password(client: AsyncClient):
         "username": "wrongpassuser",
         "password": "correctpassword"
     }
-    await client.post("/auth/register", json=register_data)
+    await client.post("/api/auth/register", json=register_data)
     
     # Login with wrong password
     login_data = {
         "email": "wrongpass@example.com",
         "password": "wrongpassword"
     }
-    response = await client.post("/auth/login", json=login_data)
+    response = await client.post("/api/auth/login", json=login_data)
     assert response.status_code == 401
 
 @pytest.mark.asyncio
 async def test_verify_token(authenticated_client: AsyncClient):
     """Test token verification"""
-    response = await authenticated_client.get("/auth/verify")
+    response = await authenticated_client.get("/api/auth/verify")
     assert response.status_code == 200
     data = response.json()
     assert data["valid"] is True
@@ -89,7 +89,7 @@ async def test_verify_token(authenticated_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_current_user(authenticated_client: AsyncClient):
     """Test getting current user profile"""
-    response = await authenticated_client.get("/auth/me")
+    response = await authenticated_client.get("/api/auth/me")
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == "test@example.com"
