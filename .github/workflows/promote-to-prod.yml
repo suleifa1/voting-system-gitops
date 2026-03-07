@@ -1,0 +1,65 @@
+name: Promote Staging to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for production deployment'
+        required: true
+        type: string
+  
+  # Опционально: автоматический промоут после успешного тестирования staging
+  # push:
+  #   branches: [staging]
+
+jobs:
+  promote-to-production:
+    name: Create Production PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Get latest staging commit
+        id: staging
+        run: |
+          git checkout staging
+          STAGING_SHA=$(git rev-parse HEAD)
+          echo "sha=${STAGING_SHA}" >> $GITHUB_OUTPUT
+      
+      - name: Create PR to main
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: promote-prod-${{ steps.staging.outputs.sha }}
+          base: main
+          title: "🚀 PRODUCTION: Promote staging → main"
+          body: |
+            ## 🚀 Production Deployment Request
+            
+            **Source:** staging branch
+            **Commit:** ${{ steps.staging.outputs.sha }}
+            **Reason:** ${{ github.event.inputs.reason || 'Automated promotion after staging validation' }}
+            
+            ### Pre-deployment Checklist:
+            - [ ] Staging environment tested
+            - [ ] No critical bugs reported
+            - [ ] Database migrations reviewed
+            - [ ] Rollback plan prepared
+            - [ ] Team notified
+            
+            ### ⚠️ IMPORTANT:
+            After merging this PR:
+            1. Manual sync required in ArgoCD UI
+            2. Monitor logs and metrics
+            3. Verify health checks
+            
+            **Manual approval required before merge!**
+          labels: |
+            production
+            deployment
+            requires-approval

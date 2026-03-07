@@ -1,0 +1,238 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [dev, staging, main]
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend-cicd.yml'
+  pull_request:
+    branches: [dev, staging, main]
+    paths:
+      - 'src/backend/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/backend
+
+jobs:
+  # =====================================
+  # JOB 1: Tests (Unit + Integration)
+  # =====================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          cd src/backend
+          pip install -r requirements.txt
+      
+      - name: Run pytest
+        run: |
+          cd src/backend
+          pytest tests/ -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src/backend
+          SECRET_KEY: test-secret-key
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: src/backend/pytest-report.xml
+
+  # =====================================
+  # JOB 2: Build Docker Image
+  # =====================================
+  build:
+    name: Build & Push Image
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Image info
+        run: |
+          echo "Image: ${{ steps.meta.outputs.tags }}"
+          echo "Digest: ${{ steps.build.outputs.digest }}"
+
+  # =====================================
+  # JOB 3: Update GitOps Repo (Dev)
+  # =====================================
+  update-gitops-dev:
+    name: Update GitOps (Dev)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in values-dev.yaml
+        run: |
+          IMAGE_TAG="dev-${{ github.sha }}"
+          sed -i "s|tag:.*|tag: ${IMAGE_TAG}|g" charts/voting-system/values-dev.yaml
+          
+          cat charts/voting-system/values-dev.yaml | grep "tag:"
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git add charts/voting-system/values-dev.yaml
+          git commit -m "ci: update backend image tag to dev-${{ github.sha }}"
+          git push origin dev
+
+  # =====================================
+  # JOB 4: E2E Tests (ОДИН РАЗ после Dev Deploy!)
+  # =====================================
+  e2e-tests-dev:
+    name: E2E Tests (Dev)
+    needs: update-gitops-dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+      
+      - name: Wait for ArgoCD sync
+        run: |
+          echo "⏳ Waiting 90 seconds for ArgoCD to sync and pods to start..."
+          sleep 90
+      
+      - name: Make script executable
+        run: chmod +x scripts/e2e-tests.sh
+      
+      - name: Run E2E tests
+        run: ./scripts/e2e-tests.sh dev
+      
+      - name: Upload test logs
+        if: always()
+        run: |
+          echo "✅ E2E tests completed for dev environment"
+
+  # =====================================
+  # JOB 5: Auto-promote to Staging (БЕЗ повторных тестов!)
+  # =====================================
+  promote-to-staging:
+    name: Auto-Promote to Staging
+    needs: e2e-tests-dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create PR to staging
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto-promote-staging-${{ github.sha }}
+          base: staging
+          title: "🚀 Auto-promote: dev → staging (${{ github.sha }})"
+          body: |
+            ## Automatic Promotion to Staging
+            
+            **Source:** dev branch
+            **Commit:** ${{ github.sha }}
+            **Triggered by:** Backend changes
+            
+            ### Changes:
+            - ✅ Tests passed in dev
+            - ✅ E2E tests successful
+            - 🎯 Ready for staging deployment
+            
+            ### Image Tag:
+            `dev-${{ github.sha }}`
+            
+            **Auto-generated by GitHub Actions**
+          labels: |
+            automated
+            staging
+            promotion
+
+  # =====================================
+  # JOB 6: Production Notification
+  # =====================================
+  prod-notification:
+    name: Prod Deployment Notification
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Notify
+        run: |
+          echo "🚀 Backend image built for PRODUCTION!"
+          echo "Image: ${{ needs.build.outputs.image-tag }}"
+          echo "⚠️  Manual sync required in ArgoCD UI"
