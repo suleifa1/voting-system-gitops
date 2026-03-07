@@ -34,16 +34,14 @@ jobs:
           cache: 'pip'
       
       - name: Install dependencies
-        run: |
-          cd src/backend
-          pip install -r requirements.txt
+        working-directory: src/backend
+        run: pip install -r requirements.txt
       
       - name: Run pytest
-        run: |
-          cd src/backend
-          pytest tests/ -v --tb=short
+        working-directory: src/backend
+        run: pytest tests/ -v --tb=short
         env:
-          PYTHONPATH: ${{ github.workspace }}/src/backend
+          PYTHONPATH: .
           SECRET_KEY: test-secret-key
       
       - name: Upload test results
