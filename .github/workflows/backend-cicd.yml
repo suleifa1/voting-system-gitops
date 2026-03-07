@@ -7,14 +7,7 @@ on:
       - 'src/backend/**'
       - '.github/workflows/backend-cicd.yml'
   pull_request:
-    branches: [de  # =====================================
-  # JOB 5: Auto-promote to Staging (БЕЗ повторных тестов!)
-  # =====================================
-  promote-to-staging:
-    name: Auto-Promote to Staging
-    needs: skip-e2e-dev
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev'ng, main]
+    branches: [dev, staging, main]
     paths:
       - 'src/backend/**'
 
