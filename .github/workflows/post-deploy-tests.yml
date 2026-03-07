@@ -1,14 +1,21 @@
 name: Post-Deploy Smoke Tests
 
+# ОТКЛЮЧЕНО: Dev кластер локальный, GitHub Actions не имеет доступа
+# Для запуска smoke tests локально используй: ./scripts/smoke-tests.sh dev
 on:
-  push:
-    branches: [dev]  # Только для dev! Staging = manual QA
-    paths:
-      - 'charts/voting-system/values-dev.yaml'
+  workflow_dispatch:  # Только manual trigger
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
 
 jobs:
   smoke-tests:
-    name: Smoke Tests (Dev Only)
+    name: Smoke Tests
     runs-on: ubuntu-latest
     
     steps:
@@ -17,11 +24,11 @@ jobs:
       
       - name: Wait for deployment
         run: |
-          echo "⏳ Waiting for ArgoCD to sync dev environment..."
+          echo "⏳ Waiting for ArgoCD to sync ${{ github.event.inputs.environment }} environment..."
           sleep 90
       
       - name: Make script executable
         run: chmod +x scripts/smoke-tests.sh
       
       - name: Run smoke tests
-        run: ./scripts/smoke-tests.sh dev
+        run: ./scripts/smoke-tests.sh ${{ github.event.inputs.environment }}
