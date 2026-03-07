@@ -9,10 +9,9 @@ backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
 import pytest
-import asyncio
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from main import app
 from src.database.connection import Base, get_db
 
@@ -22,19 +21,21 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    import asyncio
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def test_db():
     """Create a test database and return session"""
-    engine = create_async_engine(TEST_DATABASE_URL, echo=True)
+    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-    async_session = sessionmaker(
+    async_session = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
     
@@ -46,7 +47,7 @@ async def test_db():
     
     await engine.dispose()
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(test_db):
     """Create a test client"""
     async def override_get_db():
@@ -54,13 +55,14 @@ async def client(test_db):
     
     app.dependency_overrides[get_db] = override_get_db
     
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     
     app.dependency_overrides.clear()
 
-@pytest.fixture
-async def authenticated_client(client, test_db):
+@pytest_asyncio.fixture
+async def authenticated_client(client):
     """Create an authenticated test client"""
     # Register a test user
     register_data = {
@@ -72,7 +74,7 @@ async def authenticated_client(client, test_db):
     assert response.status_code == 200
     token = response.json()["access_token"]
     
-    # Add token to headers
+    # Create new client with auth headers
     client.headers.update({"Authorization": f"Bearer {token}"})
     
     return client
