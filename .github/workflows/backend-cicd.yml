@@ -148,17 +148,19 @@ jobs:
       
       - name: Update image tag in values-dev.yaml
         run: |
-          IMAGE_TAG="dev-${{ github.sha }}"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          IMAGE_TAG="dev-${SHORT_SHA}"
           sed -i "s|tag: dev.*|tag: ${IMAGE_TAG}|g" charts/voting-system/values-dev.yaml
           
           cat charts/voting-system/values-dev.yaml | grep "tag:"
       
       - name: Commit and push changes
         run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           git config user.name "GitHub Actions"
           git config user.email "github-actions@github.com"
           git add charts/voting-system/values-dev.yaml
-          git commit -m "ci: update backend image tag to dev-${{ github.sha }}" || echo "No changes to commit"
+          git commit -m "ci: update backend image tag to dev-${SHORT_SHA}" || echo "No changes to commit"
           git push origin dev
 
   # =====================================
