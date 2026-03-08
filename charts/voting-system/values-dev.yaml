@@ -8,7 +8,7 @@ backend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-0c490024515aad57365f8145179a0b82789de44e
+    tag: dev
     pullPolicy: Always
   
   resources:
@@ -23,7 +23,7 @@ frontend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-0c490024515aad57365f8145179a0b82789de44e
+    tag: dev
     pullPolicy: Always
   
   resources:
