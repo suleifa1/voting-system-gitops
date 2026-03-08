@@ -130,7 +130,39 @@ jobs:
           echo "Digest: ${{ steps.build.outputs.digest }}"
 
   # =====================================
-  # JOB 3: E2E Tests (ПРОПУСКАЕМ для Dev - локальный кластер!)
+  # JOB 3: Update GitOps Repo (Dev)
+  # =====================================
+  update-gitops-dev:
+    name: Update GitOps (Dev)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in values-dev.yaml
+        run: |
+          IMAGE_TAG="dev-${{ github.sha }}"
+          sed -i "s|tag: dev.*|tag: ${IMAGE_TAG}|g" charts/voting-system/values-dev.yaml
+          
+          cat charts/voting-system/values-dev.yaml | grep "tag:"
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git add charts/voting-system/values-dev.yaml
+          git commit -m "ci: update backend image tag to dev-${{ github.sha }}" || echo "No changes to commit"
+          git push origin dev
+
+  # =====================================
+  # JOB 4: E2E Tests (ПРОПУСКАЕМ для Dev - локальный кластер!)
   # =====================================
   # E2E тесты для dev нужно запускать локально: ./scripts/e2e-tests.sh dev
   # GitHub Actions не имеет доступа к локальному кластеру
@@ -138,7 +170,7 @@ jobs:
   
   skip-e2e-dev:
     name: E2E Tests Skipped (Dev is local)
-    needs: build
+    needs: update-gitops-dev
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev'
     
@@ -154,11 +186,11 @@ jobs:
           echo "3. If staging OK → Manual promotion to prod"
 
   # =====================================
-  # JOB 4: Auto-promote to Staging
+  # JOB 5: Auto-promote to Staging
   # =====================================
   promote-to-staging:
     name: Auto-Promote to Staging
-    needs: [skip-e2e-dev, build]
+    needs: [skip-e2e-dev, update-gitops-dev]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev'
     
