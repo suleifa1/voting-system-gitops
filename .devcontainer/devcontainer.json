@@ -1,0 +1,26 @@
+{
+  "name": "Cloudlet K8s Development Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "cloudlet-dev-container",
+  "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
+  "containerEnv": {
+    "PROJECT_DIR": "/workspace/${localWorkspaceFolderBasename}"
+  },
+  "postStartCommand": "bash /etc/init-dev-container.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "mohsen1.prettify-json",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "HashiCorp.terraform",
+        "redhat.ansible",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "Tim-Koehler.helm-intellisense"
+      ]
+    }
+  }
+}
+
