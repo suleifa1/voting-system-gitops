@@ -8,7 +8,7 @@ backend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-431f4d2
+    tag: dev-da11582
     pullPolicy: Always
   
   resources:
