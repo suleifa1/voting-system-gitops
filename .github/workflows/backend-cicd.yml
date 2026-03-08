@@ -151,8 +151,10 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           IMAGE_TAG="dev-${SHORT_SHA}"
-          sed -i "s|tag: dev.*|tag: ${IMAGE_TAG}|g" charts/voting-system/values-dev.yaml
+          # Update only backend tag, leave frontend as is
+          sed -i "/^backend:/,/^frontend:/ s|tag: dev.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
           
+          echo "Updated backend tag to: $IMAGE_TAG"
           cat charts/voting-system/values-dev.yaml | grep "tag:"
       
       - name: Commit and push changes
