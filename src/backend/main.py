@@ -7,7 +7,7 @@ from src.api.admin import router as admin_router
 from src.api.surveys import router as surveys_router
 from src.database import create_tables
 
-# CI/CD Pipeline Test - Auto-promote to staging
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
