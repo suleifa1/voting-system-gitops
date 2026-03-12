@@ -23,7 +23,7 @@ frontend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-latest  # Will be updated by CI/CD to dev-<short_sha>
+    tag: dev-7c130da
     pullPolicy: Always
   
   resources:
