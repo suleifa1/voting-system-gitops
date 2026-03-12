@@ -15,7 +15,7 @@ frontend:
   replicaCount: 2
   
   image:
-    tag: staging-latest  # Will be updated by CI/CD to staging-<short_sha>
+    tag: staging-f145ae6
     pullPolicy: Always
 
 cockroachdb:
