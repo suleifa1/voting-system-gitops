@@ -151,7 +151,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "github-actions@github.com"
           git add charts/voting-system/values-dev.yaml
-          git commit -m "ci: update frontend image tag to dev-${SHORT_SHA}" || echo "No changes to commit"
+          git commit -m "ci: update frontend image tag to dev-${SHORT_SHA} [skip ci]" || echo "No changes to commit"
           git push origin dev
 
   # =====================================
@@ -187,7 +187,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "github-actions@github.com"
           git add charts/voting-system/values-staging.yaml
-          git commit -m "ci: update frontend image tag to staging-${SHORT_SHA}" || echo "No changes to commit"
+          git commit -m "ci: update frontend image tag to staging-${SHORT_SHA} [skip ci]" || echo "No changes to commit"
           git push origin staging
 
   # =====================================
