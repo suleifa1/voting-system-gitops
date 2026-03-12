@@ -15,7 +15,7 @@ frontend:
   replicaCount: 2
   
   image:
-    tag: staging-f145ae6
+    tag: staging-4db5e03
     pullPolicy: Always
 
 cockroachdb:
