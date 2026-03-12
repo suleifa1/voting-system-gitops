@@ -8,7 +8,7 @@ backend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: latest
+    tag: dev-7c130da
     pullPolicy: Always
   
   resources:
@@ -23,7 +23,7 @@ frontend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: latest
+    tag: dev-37cfe6b
     pullPolicy: Always
   
   resources:
@@ -42,11 +42,11 @@ cockroachdb:
   
   resources:
     requests:
-      memory: "256Mi"
+      memory: "512Mi"
       cpu: "250m"
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "1Gi"
+      cpu: "1000m"
   
   persistence:
     size: 2Gi
@@ -55,8 +55,8 @@ ingress:
   hosts:
     - host: dev.voting.local
       paths:
-        - path: /api(/|$)(.*)
-          pathType: ImplementationSpecific
+        - path: /api
+          pathType: Prefix
           backend: backend
         - path: /
           pathType: Prefix

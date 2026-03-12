@@ -8,14 +8,14 @@ backend:
   replicaCount: 2
   
   image:
-    tag: staging  # Staging-specific tag
+    tag: staging-f145ae6
     pullPolicy: Always
 
 frontend:
   replicaCount: 2
   
   image:
-    tag: staging  # Staging-specific tag
+    tag: staging-4db5e03
     pullPolicy: Always
 
 cockroachdb:

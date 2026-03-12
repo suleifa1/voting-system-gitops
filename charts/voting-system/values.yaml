@@ -32,13 +32,13 @@ backend:
   
   livenessProbe:
     enabled: true
-    path: /health
+    path: /api/health
     initialDelaySeconds: 30
     periodSeconds: 10
   
   readinessProbe:
     enabled: true
-    path: /health
+    path: /api/health
     initialDelaySeconds: 10
     periodSeconds: 5
   
@@ -128,21 +128,23 @@ ingress:
   className: "nginx"
   
   # NodePort service for Ingress Controller
+  # Отключен по умолчанию, так как используется MetalLB LoadBalancer
+  # Включить только если нет LoadBalancer (minikube, kind, etc.)
   nodePort:
-    enabled: true
+    enabled: false
     httpPort: 30080
     httpsPort: 30443
   
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  annotations: {}
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
     # kubernetes.io/ingress.class: nginx
     # cert-manager.io/cluster-issuer: letsencrypt-prod
   
   hosts:
     - host: voting.local
       paths:
-        - path: /api(/|$)(.*)
-          pathType: ImplementationSpecific
+        - path: /api
+          pathType: Prefix
           backend: backend
         - path: /
           pathType: Prefix

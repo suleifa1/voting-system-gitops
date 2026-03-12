@@ -27,7 +27,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       await authService.register(formData);
       onSuccess?.();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration error');
+      setError(err.response?.data?.detail || err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
