@@ -26,7 +26,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
       await authService.login(formData);
       onSuccess?.();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login error');
+      setError(err.response?.data?.detail || err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
