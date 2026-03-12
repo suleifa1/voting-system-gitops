@@ -38,5 +38,5 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config
         - secretRef:
-            name: {{ .Release.Name }}-secret
+            name: {{ .Release.Name }}-sealed-secret
 {{- end }}
