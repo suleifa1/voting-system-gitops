@@ -49,6 +49,7 @@ cockroachdb:
     size: 10Gi
 
 ingress:
+  className: "nginx-prod"
   hosts:
     - host: voting.local  # Production domain
       paths:
