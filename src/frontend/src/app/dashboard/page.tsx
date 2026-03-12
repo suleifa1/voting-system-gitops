@@ -75,7 +75,7 @@ export default function Dashboard() {
           <div className={styles.welcome}>
             <div className={styles.welcomeContent}>
               <h2 className={styles.welcomeTitle}>
-                Welcome, {user?.username}! 
+                Welcome, {user?.username}!!!
               </h2>
               <p className={styles.welcomeText}>
                 Here you can view available surveys and vote in them.

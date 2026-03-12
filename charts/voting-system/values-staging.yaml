@@ -8,14 +8,14 @@ backend:
   replicaCount: 2
   
   image:
-    tag: staging  # Staging-specific tag
+    tag: staging-latest  # Will be updated by CI/CD to staging-<short_sha>
     pullPolicy: Always
 
 frontend:
   replicaCount: 2
   
   image:
-    tag: staging  # Staging-specific tag
+    tag: staging-latest  # Will be updated by CI/CD to staging-<short_sha>
     pullPolicy: Always
 
 cockroachdb:
