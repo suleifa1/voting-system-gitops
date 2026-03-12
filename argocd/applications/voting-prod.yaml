@@ -21,17 +21,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: prod
   
-  syncPolicy:
-    # No automated sync for production - manual approval required
-    syncOptions:
-      - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-      - PruneLast=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
+  # No sync policy - all operations manual only
   
   revisionHistoryLimit: 10
