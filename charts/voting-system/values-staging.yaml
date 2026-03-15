@@ -25,6 +25,7 @@ cockroachdb:
     size: 5Gi
 
 ingress:
+  className: "nginx-staging"
   hosts:
     - host: staging.voting.local
       paths:
