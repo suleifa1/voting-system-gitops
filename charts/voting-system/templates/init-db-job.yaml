@@ -1,0 +1,36 @@
+{{- if .Values.initDbJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-db
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: init-db
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: init-db
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: init-db
+        image: cockroachdb/cockroach:latest
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "Waiting for CockroachDB to be ready..."
+            sleep 15
+            echo "Creating database if not exists..."
+            cockroach sql --insecure --host={{ .Values.cockroachdb.name }} --execute="CREATE DATABASE IF NOT EXISTS {{ .Values.cockroachdb.database.name }};"
+            echo "Database {{ .Values.cockroachdb.database.name }} is ready!"
+{{- end }}

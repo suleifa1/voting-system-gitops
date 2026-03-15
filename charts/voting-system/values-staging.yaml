@@ -1,0 +1,40 @@
+# Staging environment values
+# Override default values for staging environment
+
+global:
+  namespace: staging
+
+backend:
+  replicaCount: 2
+  
+  image:
+    tag: staging-f145ae6
+    pullPolicy: Always
+
+frontend:
+  replicaCount: 2
+  
+  image:
+    tag: staging-4db5e03
+    pullPolicy: Always
+
+cockroachdb:
+  replicaCount: 1
+  
+  persistence:
+    size: 5Gi
+
+ingress:
+  hosts:
+    - host: staging.voting.local
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+
+# Staging secrets - USE SEALED SECRETS OR EXTERNAL SECRETS
+secret:
+  SECRET_KEY: "STAGING_PLACEHOLDER_USE_SEALED_SECRETS"

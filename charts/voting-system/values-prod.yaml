@@ -1,0 +1,78 @@
+# Production environment values
+# Override default values for production environment
+
+global:
+  namespace: prod
+
+backend:
+  replicaCount: 3  # More replicas for production
+  
+  image:
+    tag: 1.0.0  # Use stable tag in production
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+frontend:
+  replicaCount: 3  # More replicas for production
+  
+  image:
+    tag: 1.0.0  # Use stable tag in production
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+cockroachdb:
+  replicaCount: 1  # Single node for production (start-single-node mode)
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  persistence:
+    size: 10Gi
+
+ingress:
+  className: "nginx-prod"
+  hosts:
+    - host: voting.local  # Production domain
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+  
+  # Enable TLS in production
+  # tls:
+  #   - secretName: voting-tls
+  #     hosts:
+  #       - voting.local
+
+# Use regular Secret (placeholder) - will be overridden by SealedSecret
+secret:
+  SECRET_KEY: "PLACEHOLDER_OVERRIDDEN_BY_SEALED_SECRET"
+
+# SealedSecret configuration for production
+sealedSecret:
+  enabled: true
+  encryptedSecretKey: "AgB+E/fVnw0PkeCX4g32oTtOwornHSc/wtphCtjX/P/3EWkBuXhulrRBtBIXoYkNf+2eNbN7BpHWRwUWQY6mwklUQhSHaDdictw0SNwovKu3X5xJr4Ex3GvAoNxvvL28Ci8ubi4qeeq4FGkD7roFpXohm20KguE9T23z732+Q2vuC6X9Z1sybNCYDFd/rQ+A3+BRanFoKBjwEYNX+YzdUi1mTxgJDCuPpUNKDqayB8XVZy47lU+3OTLvqkE4rM/11EP3XzfX7BPY9+zA1hd5ib60WxPW/IvCEW/ykPPs6ByrNSpJvrNW99/wGEdVMxegOIGjum1PKyRt6MbumJECR/CrhprJmc9bKDZxEqoAezK+Me27yayuShoZNIYbhfzsuyHO0cjJ7PIrHAvCH6JIIlmvhlf6zC/6NpyikPkS1liRNuApN9Ci0hpn8uugQLtq5jR+beJPqS/ZFBnH4UgUJjMCvwt/rpwf1aRoam0KK91Vw6KcnhliXjCJleATIXqdlErrBZ5XK01+XHvCQeJIOavp0nIM2h8g8CFt67dTT5vltaz5zrM88LgiqqMbcZoeiDJKdcTl4SPTqQDdre64b8MB6WQ0aFVOBPJ+R3pmocy08E6Oe8qaaBrUnicrn2C9AmIouudGJab/G4N+lXCRIZv7DP47ETY5fLt7w/1gH37821GmS20/ZZn3D0DwWYDtQd9/oo/UyRSp+sBNIF6JhFngGef9zWb/gUXuvR5eOs9OSS/DYgUlm4k1f/c9/A=="
+
+

@@ -1,0 +1,64 @@
+{{- if .Values.cockroachdb.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.cockroachdb.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.cockroachdb.name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  serviceName: {{ .Values.cockroachdb.name }}
+  replicas: {{ .Values.cockroachdb.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cockroachdb.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cockroachdb.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Values.cockroachdb.name }}
+        image: "{{ .Values.cockroachdb.image.repository }}:{{ .Values.cockroachdb.image.tag }}"
+        imagePullPolicy: {{ .Values.cockroachdb.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.cockroachdb.service.grpcPort }}
+          name: grpc
+        - containerPort: {{ .Values.cockroachdb.service.httpPort }}
+          name: http
+        command:
+          - "/cockroach/cockroach"
+          - "start-single-node"
+          - "--insecure"
+          - "--http-addr=0.0.0.0"
+        volumeMounts:
+        - name: datadir
+          mountPath: /cockroach/cockroach-data
+        env:
+        - name: COCKROACH_CHANNEL
+          value: {{ .Values.cockroachdb.env.COCKROACH_CHANNEL | quote }}
+        resources:
+          {{- toYaml .Values.cockroachdb.resources | nindent 10 }}
+  {{- if .Values.cockroachdb.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes: 
+        - {{ .Values.cockroachdb.persistence.accessMode }}
+      {{- if .Values.cockroachdb.persistence.storageClass }}
+      storageClassName: {{ .Values.cockroachdb.persistence.storageClass }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.cockroachdb.persistence.size }}
+  {{- else }}
+  volumes:
+  - name: datadir
+    emptyDir: {}
+  {{- end }}
+{{- end }}

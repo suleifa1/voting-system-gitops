@@ -1,0 +1,70 @@
+version: '3.8'
+
+# Production docker-compose using pre-built images from GitHub Container Registry
+# Images should be built and pushed via GitHub Actions before using this file
+
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    container_name: cockroach
+    ports:
+      - "26257:26257"  
+      - "8080:8080"    
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+    command: start-single-node --insecure
+    restart: unless-stopped
+    environment:
+      - COCKROACH_DATABASE=poll_app
+    healthcheck:
+      test: ["CMD", "./cockroach", "sql", "--insecure", "--execute=SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - voting-network
+
+  backend:
+    image: ghcr.io/suleifa1/backend:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.prod
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+    networks:
+      - voting-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ghcr.io/suleifa1/frontend:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.prod
+    depends_on:
+      - backend
+    networks:
+      - voting-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  voting-network:
+    driver: bridge
+
+volumes:
+  cockroach-data:
+    driver: local

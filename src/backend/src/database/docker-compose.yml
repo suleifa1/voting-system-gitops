@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    container_name: cockroach
+    ports:
+      - "26257:26257"  # SQL port
+      - "8080:8080"    # Admin UI
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+    command: start-single-node --insecure
+    restart: unless-stopped
+    environment:
+      - COCKROACH_DATABASE=poll_app
+    healthcheck:
+      test: ["CMD", "./cockroach", "sql", "--insecure", "--execute=SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cockroach-data:
+    driver: local

@@ -1,0 +1,66 @@
+# Development environment values
+# Override default values for dev environment
+
+global:
+  namespace: dev
+
+backend:
+  replicaCount: 1  # Single replica for dev
+  
+  image:
+    tag: dev-7c130da
+    pullPolicy: Always
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+frontend:
+  replicaCount: 1  # Single replica for dev
+  
+  image:
+    tag: dev-37cfe6b
+    pullPolicy: Always
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+  
+  env:
+    NODE_ENV: "development"
+
+cockroachdb:
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  persistence:
+    size: 2Gi
+
+ingress:
+  hosts:
+    - host: dev.voting.local
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: backend
+        - path: /
+          pathType: Prefix
+          backend: frontend
+
+secret:
+  SECRET_KEY: "dev-secret-key-not-for-production"
