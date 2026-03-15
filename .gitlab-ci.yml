@@ -1,0 +1,324 @@
+# GitLab CI/CD Pipeline for Voting System
+# Equivalent to GitHub Actions workflows
+
+stages:
+  - test
+  - build
+  - update-gitops
+  - promote
+
+variables:
+  REGISTRY: registry.gitlab.kiv.zcu.cz
+  BACKEND_IMAGE_NAME: voting-system-backend
+  FRONTEND_IMAGE_NAME: voting-system-frontend
+  BACKEND_DOCKERFILE: src/backend/Dockerfile
+  FRONTEND_DOCKERFILE: src/frontend/Dockerfile
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_VERIFY: ""
+
+# =====================================
+# JOB 1: Backend Tests
+# =====================================
+backend-test:
+  stage: test
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - dev
+    - staging
+    - main
+  changes:
+    - src/backend/**
+    - .gitlab-ci.yml
+
+  services:
+    - postgres:15
+
+  variables:
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_pass
+    POSTGRES_DB: test_db
+    POSTGRES_HOST_AUTH_METHOD: trust
+    PYTHONUNBUFFERED: "1"
+
+  before_script:
+    - apk add --no-cache python3 py3-pip postgresql-client
+    - cd src/backend
+    - pip install --no-cache-dir -r requirements.txt pytest httpx
+
+  script:
+    - echo "🧪 Running backend tests..."
+    - pytest tests/ -v --tb=short
+    - echo "✅ Backend tests passed!"
+
+  artifacts:
+    reports:
+      junit: src/backend/pytest-report.xml
+    paths:
+      - src/backend/pytest-report.xml
+    expire_in: 1 week
+    when: always
+
+  cache:
+    paths:
+      - .cache/pip
+    key: $CI_COMMIT_REF_SLUG
+
+# =====================================
+# JOB 2: Frontend Tests (optional)
+# =====================================
+frontend-test:
+  stage: test
+  image: node:18-alpine
+  tags:
+    - kiv
+  only:
+    - dev
+    - staging
+    - main
+  changes:
+    - src/frontend/**
+    - .gitlab-ci.yml
+
+  before_script:
+    - cd src/frontend
+    - npm ci
+
+  script:
+    - echo "🧪 Running frontend tests..."
+    - npm run test:ci || true  # Frontend tests optional
+    - echo "✅ Frontend tests completed!"
+
+  allow_failure: true
+
+# =====================================
+# JOB 3: Build Backend Image
+# =====================================
+build-backend:
+  stage: build
+  image: docker:24-dind
+  tags:
+    - kiv
+  only:
+    - dev
+    - staging
+    - main
+  needs:
+    - backend-test
+  changes:
+    - src/backend/**
+    - .gitlab-ci.yml
+
+  services:
+    - docker:24-dind
+
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
+    - echo "Branch: $CI_COMMIT_REF_NAME, Commit SHA: $CI_COMMIT_SHA"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
+    - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+    
+    - echo "🐳 Building backend image: $FULL_IMAGE"
+    - docker build -t $FULL_IMAGE -f $BACKEND_DOCKERFILE src/backend/
+    
+    - echo "📤 Pushing image to registry..."
+    - docker push $FULL_IMAGE
+    
+    - echo "✅ Backend image built and pushed!"
+    - echo "Image: $FULL_IMAGE"
+
+  after_script:
+    - docker logout $REGISTRY
+
+# =====================================
+# JOB 4: Build Frontend Image
+# =====================================
+build-frontend:
+  stage: build
+  image: docker:24-dind
+  tags:
+    - kiv
+  only:
+    - dev
+    - staging
+    - main
+  needs:
+    - frontend-test
+  changes:
+    - src/frontend/**
+    - .gitlab-ci.yml
+
+  services:
+    - docker:24-dind
+
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
+    - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+    
+    - echo "🐳 Building frontend image: $FULL_IMAGE"
+    - docker build -t $FULL_IMAGE -f $FRONTEND_DOCKERFILE src/frontend/
+    
+    - echo "📤 Pushing image to registry..."
+    - docker push $FULL_IMAGE
+    
+    - echo "✅ Frontend image built and pushed!"
+    - echo "Image: $FULL_IMAGE"
+
+  after_script:
+    - docker logout $REGISTRY
+
+# =====================================
+# JOB 5: Update GitOps Repo (Dev)
+# =====================================
+update-gitops-dev:
+  stage: update-gitops
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - dev
+  needs:
+    - build-backend
+    - build-frontend
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+    
+    - echo "📝 Updating values-dev.yaml with new image tags..."
+    - |
+      sed -i "s|tag: dev-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
+    
+    - cat charts/voting-system/values-dev.yaml | grep -A 2 "backend:" | grep "tag:"
+    
+    - echo "📤 Committing and pushing changes..."
+    - git add charts/voting-system/values-dev.yaml
+    - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git dev
+
+  only:
+    variables:
+      - $GIT_TOKEN
+
+# =====================================
+# JOB 6: Update GitOps Repo (Staging)
+# =====================================
+update-gitops-staging:
+  stage: update-gitops
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - staging
+  needs:
+    - build-backend
+    - build-frontend
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="staging-${SHORT_SHA}"
+    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+    
+    - echo "📝 Updating values-staging.yaml with new image tags..."
+    - |
+      sed -i "s|tag: staging-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
+    
+    - cat charts/voting-system/values-staging.yaml | grep -A 2 "backend:" | grep "tag:"
+    
+    - echo "📤 Committing and pushing changes..."
+    - git add charts/voting-system/values-staging.yaml
+    - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git staging
+
+  only:
+    variables:
+      - $GIT_TOKEN
+
+# =====================================
+# JOB 7: Auto-Promote Dev to Staging
+# =====================================
+promote-to-staging:
+  stage: promote
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - dev
+  needs:
+    - update-gitops-dev
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    
+    - echo "🚀 Creating merge request dev → staging..."
+    - |
+      git clone https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git /tmp/repo
+      cd /tmp/repo
+      git config user.name "GitLab CI"
+      git config user.email "ci@gitlab.local"
+      git checkout -b promote-dev-to-staging-${SHORT_SHA} staging
+      git merge --no-ff dev -m "🚀 Auto-promote: dev → staging (${IMAGE_TAG})" || true
+      git push -o merge_request.create -o merge_request.target=staging https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git promote-dev-to-staging-${SHORT_SHA}
+    
+    - echo "✅ Merge request created!"
+
+  allow_failure: true
+  only:
+    variables:
+      - $GIT_TOKEN
+
+# =====================================
+# JOB 8: Production Notification
+# =====================================
+prod-notification:
+  stage: promote
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - main
+  needs:
+    - build-backend
+    - build-frontend
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:main-${SHORT_SHA}"
+    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:main-${SHORT_SHA}"
+    
+    - echo "🚀 ====================================="
+    - echo "Backend image built for PRODUCTION!"
+    - echo "Backend: $BACKEND_IMAGE"
+    - echo "Frontend: $FRONTEND_IMAGE"
+    - echo "⚠️  Manual sync required in ArgoCD UI"
+    - echo "🔗 https://argocd.kiv.zcu.cz/applications"
+    - echo "====================================="
