@@ -4,6 +4,7 @@ stages:
   - test
   - build
   - update-gitops
+  - commit-gitops
   - promote
 
 variables:
@@ -168,18 +169,16 @@ update-gitops-dev-backend:
   needs:
     - build-backend
 
-  before_script:
-    - apk add --no-cache git
-    - git config --global user.name "GitLab CI"
-    - git config --global user.email "ci@gitlab.local"
-
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
     - ./scripts/update-image-tag-dev.sh backend "$IMAGE_TAG"
-    - git add charts/voting-system/values-dev.yaml
-    - git commit -m "update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
+    - echo "Backend tag updated to $IMAGE_TAG"
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-dev.yaml
+    expire_in: 10 min
 
 # =====================================
 # JOB 5b: Update GitOps Repo - Frontend (Dev)
@@ -196,18 +195,16 @@ update-gitops-dev-frontend:
   needs:
     - build-frontend
 
-  before_script:
-    - apk add --no-cache git
-    - git config --global user.name "GitLab CI"
-    - git config --global user.email "ci@gitlab.local"
-
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
     - ./scripts/update-image-tag-dev.sh frontend "$IMAGE_TAG"
-    - git add charts/voting-system/values-dev.yaml
-    - git commit -m "update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
+    - echo "Frontend tag updated to $IMAGE_TAG"
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-dev.yaml
+    expire_in: 10 min
 
 # =====================================
 # JOB 6: Update GitOps Repo - Backend (Staging)
@@ -224,18 +221,16 @@ update-gitops-staging-backend:
   needs:
     - build-backend
 
-  before_script:
-    - apk add --no-cache git
-    - git config --global user.name "GitLab CI"
-    - git config --global user.email "ci@gitlab.local"
-
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
     - ./scripts/update-image-tag-staging.sh backend "$IMAGE_TAG"
-    - git add charts/voting-system/values-staging.yaml
-    - git commit -m "update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
+    - echo "Backend tag updated to $IMAGE_TAG"
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-staging.yaml
+    expire_in: 10 min
 
 # =====================================
 # JOB 6b: Update GitOps Repo - Frontend (Staging)
@@ -252,6 +247,59 @@ update-gitops-staging-frontend:
   needs:
     - build-frontend
 
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="staging-${SHORT_SHA}"
+    - ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
+    - echo "Frontend tag updated to $IMAGE_TAG"
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-staging.yaml
+    expire_in: 10 min
+
+# =====================================
+# JOB 6c: Commit and Push Changes (Dev)
+# =====================================
+commit-gitops-dev:
+  stage: commit-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - dev
+  needs:
+    - job: update-gitops-dev-backend
+      optional: true
+    - job: update-gitops-dev-frontend
+      optional: true
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    - git add charts/voting-system/values-dev.yaml || true
+    - git commit -m "update image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
+
+# =====================================
+# JOB 6d: Commit and Push Changes (Staging)
+# =====================================
+commit-gitops-staging:
+  stage: commit-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - staging
+  needs:
+    - job: update-gitops-staging-backend
+      optional: true
+    - job: update-gitops-staging-frontend
+      optional: true
+
   before_script:
     - apk add --no-cache git
     - git config --global user.name "GitLab CI"
@@ -260,9 +308,8 @@ update-gitops-staging-frontend:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
-    - git add charts/voting-system/values-staging.yaml
-    - git commit -m "update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git add charts/voting-system/values-staging.yaml || true
+    - git commit -m "update image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
 
 # =====================================
@@ -274,9 +321,7 @@ promote-to-staging:
   only:
     - dev
   needs:
-    - job: update-gitops-dev-backend
-      optional: true
-    - job: update-gitops-dev-frontend
+    - job: commit-gitops-dev
       optional: true
 
   before_script:
