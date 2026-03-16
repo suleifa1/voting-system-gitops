@@ -36,7 +36,7 @@ main_app.add_middleware(
 # Create API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Подключаем роутеры к API router
+
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(polls_router, prefix="/polls", tags=["polls"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
