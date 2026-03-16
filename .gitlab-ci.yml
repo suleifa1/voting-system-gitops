@@ -12,6 +12,7 @@ variables:
   FRONTEND_IMAGE_NAME: voting-system-frontend
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
+  DOCKER_TLS_CERTDIR: "/certs"
 
 default:
   image: docker:24.0.5-cli
@@ -19,8 +20,6 @@ default:
     - docker:24.0.5-dind
   tags:
     - kiv
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
 
 # =====================================
 # Global Variables
