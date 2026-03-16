@@ -14,7 +14,7 @@ variables:
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_VERIFY: ""
 
