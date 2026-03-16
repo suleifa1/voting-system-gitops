@@ -115,7 +115,7 @@ frontend-test:
 # =====================================
 build-backend:
   stage: build
-  image: alpine:3.17
+  image: gcr.io/kaniko-project/executor:latest
   tags:
     - kiv
   only:
@@ -124,31 +124,23 @@ build-backend:
     - main
 
   before_script:
-    - apk add --no-cache podman
-    - mkdir -p ~/.config/containers
-    - echo '[registries.insecure]' > ~/.config/containers/registries.conf
-    - echo "registries = ['gitlab.kiv.zcu.cz:5000']" >> ~/.config/containers/registries.conf
-    - podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
-
-  script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo 'Building backend image:' "$FULL_IMAGE"
-    - podman build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
-    - echo 'Pushing image to registry...'
-    - podman push "$FULL_IMAGE"
-    - echo 'Backend image built and pushed!'
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf '%s:%s' '$CI_REGISTRY_USER' '$CI_REGISTRY_PASSWORD' | base64 -w0)\"}}}" > /kaniko/.docker/config.json
 
-  after_script:
-    - podman logout "$REGISTRY" || true
+  script:
+    - echo "Building backend image: $FULL_IMAGE"
+    - /kaniko/executor --context src/backend --dockerfile src/backend/Dockerfile --destination "$FULL_IMAGE" --insecure-registry "$REGISTRY"
+    - echo "Backend image built and pushed!"
 
 # =====================================
 # JOB 4: Build Frontend Image
 # =====================================
 build-frontend:
   stage: build
-  image: alpine:3.17
+  image: gcr.io/kaniko-project/executor:latest
   tags:
     - kiv
   only:
@@ -157,24 +149,16 @@ build-frontend:
     - main
 
   before_script:
-    - apk add --no-cache podman
-    - mkdir -p ~/.config/containers
-    - echo '[registries.insecure]' > ~/.config/containers/registries.conf
-    - echo "registries = ['gitlab.kiv.zcu.cz:5000']" >> ~/.config/containers/registries.conf
-    - podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
-
-  script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo 'Building frontend image:' "$FULL_IMAGE"
-    - podman build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
-    - echo 'Pushing image to registry...'
-    - podman push "$FULL_IMAGE"
-    - echo 'Frontend image built and pushed!'
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf '%s:%s' '$CI_REGISTRY_USER' '$CI_REGISTRY_PASSWORD' | base64 -w0)\"}}}" > /kaniko/.docker/config.json
 
-  after_script:
-    - podman logout "$REGISTRY" || true
+  script:
+    - echo "Building frontend image: $FULL_IMAGE"
+    - /kaniko/executor --context src/frontend --dockerfile src/frontend/Dockerfile --destination "$FULL_IMAGE" --insecure-registry "$REGISTRY"
+    - echo "Frontend image built and pushed!"
 
 # =====================================
 # JOB 5: Update GitOps Repo (Dev)
