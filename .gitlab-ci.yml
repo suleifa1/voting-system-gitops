@@ -1,24 +1,12 @@
 # GitLab CI/CD Pipeline for Voting System
-# Equivalent to GitHub Actions workflows
 
 stages:
   - test
   - build
-  - update-gitobuild-frontend:
-  stage: build
-  image: alpine:3.17
-  tags:
-    - kiv
-  only:
-    - dev
-    - staging
-    - main
-  needs:
-    - frontend-test
+  - update-gitops
+  - promote
 
-  before_script:
-    - apk add --no-cache docker
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"ariables:
+variables:
   REGISTRY: gitlab.kiv.zcu.cz:5000
   BACKEND_IMAGE_NAME: voting-system-backend
   FRONTEND_IMAGE_NAME: voting-system-frontend
@@ -54,9 +42,9 @@ backend-test:
     - pip install --no-cache-dir -r requirements.txt pytest httpx
 
   script:
-    - echo "🧪 Running backend tests..."
+    - echo 'Running backend tests...'
     - pytest tests/ -v --tb=short
-    - echo "✅ Backend tests passed!"
+    - echo 'Backend tests passed!'
 
   artifacts:
     reports:
@@ -72,7 +60,7 @@ backend-test:
     key: $CI_COMMIT_REF_SLUG
 
 # =====================================
-# JOB 2: Frontend Tests (optional)
+# JOB 2: Frontend Tests
 # =====================================
 frontend-test:
   stage: test
@@ -89,9 +77,9 @@ frontend-test:
     - npm ci
 
   script:
-    - echo "🧪 Running frontend tests..."
-    - npm run test:ci || true  # Frontend tests optional
-    - echo "✅ Frontend tests completed!"
+    - echo 'Running frontend tests...'
+    - npm run test:ci || true
+    - echo 'Frontend tests completed!'
 
   allow_failure: true
 
@@ -133,7 +121,7 @@ build-backend:
 # =====================================
 build-frontend:
   stage: build
-  image: docker:24-dind
+  image: alpine:3.17
   tags:
     - kiv
   only:
@@ -143,10 +131,8 @@ build-frontend:
   needs:
     - frontend-test
 
-  services:
-    - docker:24-dind
-
   before_script:
+    - apk add --no-cache docker
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
 
   script:
@@ -187,7 +173,6 @@ update-gitops-dev:
     - export IMAGE_TAG="dev-${SHORT_SHA}"
     - echo 'Image tag:' "$IMAGE_TAG"
     - echo 'Would update values-dev.yaml here'
-    - echo 'Would commit and push changes'
 
 # =====================================
 # JOB 6: Update GitOps Repo (Staging)
@@ -213,7 +198,6 @@ update-gitops-staging:
     - export IMAGE_TAG="staging-${SHORT_SHA}"
     - echo 'Image tag:' "$IMAGE_TAG"
     - echo 'Would update values-staging.yaml here'
-    - echo 'Would commit and push changes'
 
 # =====================================
 # JOB 7: Auto-Promote Dev to Staging
