@@ -28,10 +28,17 @@ debug-docker-socket:
 
   script:
     - echo "=== Checking Docker socket ==="
-    - ls -la /var/run/docker.sock || echo "Socket not found"
+    - ls -la /var/run/docker.sock 2>&1 || echo "Socket not found in /var/run/"
+    - echo ""
+    - echo "=== Looking for docker socket anywhere ==="
+    - find /var/run -name "*docker*" 2>/dev/null || echo "No docker sockets found"
+    - echo ""
+    - echo "=== Checking environment variables ==="
+    - env | grep -i docker || echo "No docker env vars"
+    - echo ""
+    - echo "=== Trying to install and use docker-cli ==="
     - apk add --no-cache docker-cli
-    - docker ps && echo "Docker works!" || echo "Docker does not work"
-    - docker version || true
+    - docker ps 2>&1 || echo "Docker daemon not accessible"
 
 # =====================================
 # JOB 1: Backend Tests
