@@ -255,11 +255,10 @@ prod-notification:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:main-${SHORT_SHA}"
     - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:main-${SHORT_SHA}"
-    
-    - echo "🚀 ====================================="
-    - echo "Backend image built for PRODUCTION!"
-    - echo "Backend: $BACKEND_IMAGE"
-    - echo "Frontend: $FRONTEND_IMAGE"
-    - echo "⚠️  Manual sync required in ArgoCD UI"
-    - echo "🔗 https://argocd.kiv.zcu.cz/applications"
-    - echo "====================================="
+    - echo '====================================='
+    - echo 'Backend image built for PRODUCTION!'
+    - echo 'Backend:' "$BACKEND_IMAGE"
+    - echo 'Frontend:' "$FRONTEND_IMAGE"
+    - echo 'Manual sync required in ArgoCD UI'
+    - echo 'https://argocd.kiv.zcu.cz/applications'
+    - echo '====================================='
