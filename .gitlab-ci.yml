@@ -40,17 +40,6 @@ debug-docker-socket:
     - apk add --no-cache docker-cli
     - docker ps 2>&1 || echo "Docker daemon not accessible"
 
-# =====================================
-# DEBUG: Check Kaniko
-# =====================================
-debug-kaniko:
-  stage: debug
-  image: gcr.io/kaniko-project/executor:latest
-  only:
-    - main
-
-  script:
-    - echo "Kaniko test skipped - using DinD instead"
 
 # =====================================
 # JOB 1: Backend Tests
