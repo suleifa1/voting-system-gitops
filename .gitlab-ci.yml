@@ -1,7 +1,6 @@
 # GitLab CI/CD Pipeline for Voting System
 
 stages:
-  - debug
   - build
   - test
   - update-gitops
@@ -14,31 +13,6 @@ variables:
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
 
-# =====================================
-# JOB 0: Debug - Check Docker Info
-# =====================================
-debug-docker-info:
-  stage: debug
-  image: alpine:3.17
-  tags:
-    - kiv
-  only:
-    - main
-    - staging
-    - dev
-
-  script:
-    - echo "=== Checking for Docker/Podman ==="
-    - which docker || echo "Docker not found"
-    - which podman || echo "Podman not found"
-    - echo ""
-    - echo "=== Checking /var/run/ ==="
-    - ls -la /var/run/ | grep -E 'docker|podman' || echo "No docker/podman sockets found"
-    - echo ""
-    - echo "=== Checking installed packages ==="
-    - apk add --no-cache docker podman 2>&1 | head -20
-    - docker --version 2>/dev/null || echo "Docker not available"
-    - podman --version 2>/dev/null || echo "Podman not available"
 
 # =====================================
 # JOB 1: Backend Tests
