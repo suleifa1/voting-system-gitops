@@ -95,7 +95,6 @@ build-backend:
   only:
     changes:
       - src/backend/**/*
-      - .gitlab-ci.yml
     refs:
       - dev
       - staging
@@ -130,7 +129,6 @@ build-frontend:
   only:
     changes:
       - src/frontend/**/*
-      - .gitlab-ci.yml
     refs:
       - dev
       - staging

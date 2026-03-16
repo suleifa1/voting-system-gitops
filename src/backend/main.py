@@ -13,7 +13,6 @@ from src.database import create_tables
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Application startup")
-    # Таблицы уже созданы через Alembic, ничего не делаем
     yield
     # Shutdown  
     print("🛑 Application shutdown")
@@ -26,7 +25,6 @@ main_app = FastAPI(
     lifespan=lifespan
 )
 
-# Добавляем CORS middleware
 main_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for Ingress
