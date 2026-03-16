@@ -1,7 +1,7 @@
 # GitLab CI/CD Pipeline for Voting System
 
 stages:
-  # - test
+  - test
   - build
   - update-gitops
   - promote
