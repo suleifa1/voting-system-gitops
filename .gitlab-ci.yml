@@ -135,7 +135,7 @@ build-backend:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building backend image with buildx: $FULL_IMAGE"
+    - echo "Building backend image with buildx:" " $FULL_IMAGE"
     - docker buildx build --push -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
     - echo "Backend image built and pushed!"
 
@@ -160,7 +160,7 @@ build-frontend:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building frontend image with buildx: $FULL_IMAGE"
+    - echo "Building frontend image with buildx:" "$FULL_IMAGE"
     - docker buildx build --push -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
     - echo "Frontend image built and pushed!"
 
