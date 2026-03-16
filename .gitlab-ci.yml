@@ -99,17 +99,16 @@ build-backend:
     - main
 
   before_script:
-    - echo "=== Diagnostics ==="
-    - echo "DOCKER_HOST:" $DOCKER_HOST
-    - echo "Checking network connectivity to docker service..."
-    - apk add --no-cache netcat-openbsd curl
-    - nc -zv docker 2375 || echo "Port 2375 not reachable"
-    - curl -v http://docker:2375/_ping || echo "Docker API not responding"
-    - echo "Checking if dockerd is running..."
-    - ps aux | grep -i docker || echo "No docker processes found"
-    - echo "Waiting for Docker daemon..."
-    - sleep 10
-    - docker info || echo "Docker info failed"
+    - echo "=== Network Diagnostics ==="
+    - cat /etc/hosts
+    - nslookup docker || echo "DNS lookup failed"
+    - ping -c 3 docker || echo "Ping failed"
+    - echo "=== Checking all network interfaces ==="
+    - ip addr || ifconfig || echo "No network info"
+    - echo "=== Waiting longer for DinD service ==="
+    - sleep 20
+    - echo "=== Attempting Docker connection ==="
+    - docker info || echo "Docker daemon not available"
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
 
   script:
