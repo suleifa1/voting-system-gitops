@@ -48,8 +48,8 @@ debug-docker-hosts:
     - env | grep -iE 'docker|host' || echo "No matches"
     - echo ""
     - echo "=== Testing docker commands ==="
-    - docker ps && echo "SUCCESS: docker ps works!"
-    - docker images && echo "SUCCESS: docker images works!"
+    - docker ps 
+    - docker images 
 
 # =====================================
 # JOB 1: Backend Tests
