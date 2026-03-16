@@ -1,6 +1,7 @@
 # GitLab CI/CD Pipeline for Voting System
 
 stages:
+  - debug
   - build
   - test
   - update-gitops
@@ -12,6 +13,40 @@ variables:
   FRONTEND_IMAGE_NAME: voting-system-frontend
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
+
+# =====================================
+# JOB 0: Debug - Check Docker Info
+# =====================================
+debug-docker-info:
+  stage: debug
+  image: docker:24-dind
+  tags:
+    - kiv
+  only:
+    - main
+    - staging
+    - dev
+
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+
+  services:
+    - docker:24-dind
+
+  script:
+    - echo "=== Docker Info ==="
+    - docker --version
+    - docker info
+    - echo ""
+    - echo "=== Docker Images ==="
+    - docker images
+    - echo ""
+    - echo "=== Docker Containers ==="
+    - docker ps -a
+    - echo ""
+    - echo "=== Docker Socket ==="
+    - ls -la /var/run/docker.sock || echo "Socket not found at /var/run/docker.sock"
 
 # =====================================
 # JOB 1: Backend Tests
