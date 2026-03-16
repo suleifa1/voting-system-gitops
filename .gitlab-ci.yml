@@ -116,6 +116,7 @@ build-backend:
       --context "${CI_PROJECT_DIR}/src/backend"
       --dockerfile "${CI_PROJECT_DIR}/${BACKEND_DOCKERFILE}"
       --destination "${FULL_IMAGE}"
+      --customPlatform=linux/arm64
       --cache=true
       --cache-ttl=24h
       --snapshotMode=redo
@@ -150,6 +151,7 @@ build-frontend:
       --context "${CI_PROJECT_DIR}/src/frontend"
       --dockerfile "${CI_PROJECT_DIR}/${FRONTEND_DOCKERFILE}"
       --destination "${FULL_IMAGE}"
+      --customPlatform=linux/arm64
       --cache=true
       --cache-ttl=24h
       --snapshotMode=redo
