@@ -67,7 +67,7 @@ async def health_check():
 
 # Mount API router to main app
 main_app.include_router(api_router)
-
+ 
 app = main_app
 
 if __name__ == "__main__":
