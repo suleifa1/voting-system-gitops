@@ -8,7 +8,7 @@ stages:
   - promote
 
 variables:
-  REGISTRY: registry.gitlab.kiv.zcu.cz
+  REGISTRY: gitlab.kiv.zcu.cz:5000
   BACKEND_IMAGE_NAME: voting-system-backend
   FRONTEND_IMAGE_NAME: voting-system-frontend
   BACKEND_DOCKERFILE: src/backend/Dockerfile
