@@ -12,10 +12,8 @@ variables:
   FRONTEND_IMAGE_NAME: voting-system-frontend
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_VERIFY: 1
-  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
 
 default:
   image: docker:24.0.5-cli
