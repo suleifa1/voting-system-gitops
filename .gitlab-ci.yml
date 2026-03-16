@@ -30,9 +30,6 @@ backend-test:
     - dev
     - staging
     - main
-  changes:
-    - src/backend/**
-    - .gitlab-ci.yml
 
   services:
     - postgres:15
@@ -79,9 +76,6 @@ frontend-test:
     - dev
     - staging
     - main
-  changes:
-    - src/frontend/**
-    - .gitlab-ci.yml
 
   before_script:
     - cd src/frontend
@@ -108,9 +102,6 @@ build-backend:
     - main
   needs:
     - backend-test
-  changes:
-    - src/backend/**
-    - .gitlab-ci.yml
 
   services:
     - docker:24-dind
@@ -147,9 +138,6 @@ build-frontend:
     - main
   needs:
     - frontend-test
-  changes:
-    - src/frontend/**
-    - .gitlab-ci.yml
 
   services:
     - docker:24-dind
