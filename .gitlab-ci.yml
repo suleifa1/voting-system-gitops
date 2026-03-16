@@ -317,8 +317,12 @@ promote-to-staging:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - echo 'Would create merge request dev -> staging'
-    - echo 'Image tag:' "$IMAGE_TAG"
+    - echo "Promoting dev to staging (commit ${SHORT_SHA})"
+    - git fetch origin staging
+    - git checkout staging
+    - git merge origin/dev --no-ff -m "[chore] promote dev ${IMAGE_TAG} to staging [skip ci]"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
+    - echo "Successfully promoted to staging!"
 
   allow_failure: true
 
