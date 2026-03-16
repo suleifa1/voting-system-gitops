@@ -36,7 +36,6 @@ main_app.add_middleware(
 # Create API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
-
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(polls_router, prefix="/polls", tags=["polls"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
@@ -69,7 +68,6 @@ async def health_check():
 # Mount API router to main app
 main_app.include_router(api_router)
 
-# Alias for uvicorn
 app = main_app
 
 if __name__ == "__main__":
