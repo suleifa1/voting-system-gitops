@@ -1,6 +1,7 @@
 # GitLab CI/CD Pipeline for Voting System
 
 stages:
+  - debug
   - build
   - test
   - update-gitops
@@ -13,6 +14,27 @@ variables:
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
 
+tags:
+  - kiv
+
+only:
+  - dev
+  - staging
+  - main
+
+# =====================================
+# DEBUG: Check Docker Socket Access
+# =====================================
+debug-docker-socket:
+  stage: debug
+  image: alpine:3.17
+
+  script:
+    - echo "=== Checking Docker socket ==="
+    - ls -la /var/run/docker.sock || echo "Socket not found"
+    - apk add --no-cache docker-cli
+    - docker ps && echo "Docker works!" || echo "Docker does not work"
+    - docker version || true
 
 # =====================================
 # JOB 1: Backend Tests
@@ -20,12 +42,6 @@ variables:
 backend-test:
   stage: test
   image: alpine:3.17
-  tags:
-    - kiv
-  only:
-    - dev
-    - staging
-    - main
 
   services:
     - postgres:15
@@ -66,12 +82,6 @@ backend-test:
 frontend-test:
   stage: test
   image: node:18-alpine
-  tags:
-    - kiv
-  only:
-    - dev
-    - staging
-    - main
 
   before_script:
     - cd src/frontend
@@ -90,12 +100,6 @@ frontend-test:
 build-backend:
   stage: build
   image: gcr.io/kaniko-project/executor:latest
-  tags:
-    - kiv
-  only:
-    - dev
-    - staging
-    - main
 
   before_script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
@@ -114,12 +118,6 @@ build-backend:
 build-frontend:
   stage: build
   image: gcr.io/kaniko-project/executor:latest
-  tags:
-    - kiv
-  only:
-    - dev
-    - staging
-    - main
 
   before_script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
@@ -139,8 +137,6 @@ build-frontend:
 update-gitops-dev:
   stage: update-gitops
   image: alpine:3.17
-  tags:
-    - kiv
   only:
     - dev
   needs:
@@ -164,8 +160,6 @@ update-gitops-dev:
 update-gitops-staging:
   stage: update-gitops
   image: alpine:3.17
-  tags:
-    - kiv
   only:
     - staging
   needs:
@@ -189,8 +183,6 @@ update-gitops-staging:
 promote-to-staging:
   stage: promote
   image: alpine:3.17
-  tags:
-    - kiv
   only:
     - dev
   needs:
@@ -215,8 +207,6 @@ promote-to-staging:
 prod-notification:
   stage: promote
   image: alpine:3.17
-  tags:
-    - kiv
   only:
     - main
   needs:
