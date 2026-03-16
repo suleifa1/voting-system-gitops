@@ -129,14 +129,14 @@ build-backend:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
+    - docker buildx create --use --driver-opt image=moby/buildkit:latest || true
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building backend image:" '$FULL_IMAGE'
-    - docker build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
-    - docker push "$FULL_IMAGE"
+    - echo "Building backend image with buildx: $FULL_IMAGE"
+    - docker buildx build --push -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
     - echo "Backend image built and pushed!"
 
   after_script:
@@ -154,14 +154,14 @@ build-frontend:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
+    - docker buildx create --use --driver-opt image=moby/buildkit:latest || true
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building frontend image:" '$FULL_IMAGE'
-    - docker build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
-    - docker push "$FULL_IMAGE"
+    - echo "Building frontend image with buildx: $FULL_IMAGE"
+    - docker buildx build --push -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
     - echo "Frontend image built and pushed!"
 
   after_script:
