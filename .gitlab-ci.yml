@@ -183,14 +183,10 @@ update-gitops-dev:
     - export IMAGE_TAG="dev-${SHORT_SHA}"
     - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
     - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    
-    - echo "📝 Updating values-dev.yaml with new image tags..."
-    - |
-      sed -i "s|tag: dev-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
-    
+    - echo 'Updating values-dev.yaml with new image tags...'
+    - sed -i "s|tag: dev-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
     - cat charts/voting-system/values-dev.yaml | grep -A 2 "backend:" | grep "tag:"
-    
-    - echo "📤 Committing and pushing changes..."
+    - echo 'Committing and pushing changes...'
     - git add charts/voting-system/values-dev.yaml
     - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git dev
@@ -223,14 +219,10 @@ update-gitops-staging:
     - export IMAGE_TAG="staging-${SHORT_SHA}"
     - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
     - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    
-    - echo "📝 Updating values-staging.yaml with new image tags..."
-    - |
-      sed -i "s|tag: staging-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
-    
+    - echo 'Updating values-staging.yaml with new image tags...'
+    - sed -i "s|tag: staging-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
     - cat charts/voting-system/values-staging.yaml | grep -A 2 "backend:" | grep "tag:"
-    
-    - echo "📤 Committing and pushing changes..."
+    - echo 'Committing and pushing changes...'
     - git add charts/voting-system/values-staging.yaml
     - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git staging
