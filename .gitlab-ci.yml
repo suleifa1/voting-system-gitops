@@ -298,7 +298,7 @@ commit-gitops-staging:
     - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
 
 # =====================================
-# JOB 7: Auto-Promote Dev to Staging
+# JOB 7: Auto-Create MR Dev to Staging
 # =====================================
 promote-to-staging:
   stage: promote
@@ -310,19 +310,33 @@ promote-to-staging:
       optional: true
 
   before_script:
-    - apk add --no-cache git
-    - git config --global user.name "GitLab CI"
-    - git config --global user.email "ci@gitlab.local"
+    - apk add --no-cache curl jq
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - echo "Promoting dev to staging (commit ${SHORT_SHA})"
-    - git fetch origin staging
-    - git checkout staging
-    - git merge origin/dev --no-ff -m "[chore] promote dev ${IMAGE_TAG} to staging [skip ci]"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
-    - echo "Successfully promoted to staging!"
+    - export MR_TITLE="🚀 Promote dev ${IMAGE_TAG} to staging"
+    - 'export MR_DESCRIPTION="Automated promotion from dev to staging%0A%0AChanges:%0A- Backend/Frontend images: ${IMAGE_TAG}%0A- Commit: ${CI_COMMIT_SHA}"'
+    - |
+      echo "Creating Merge Request: dev -> staging"
+      RESPONSE=$(curl --silent --request POST \
+        --header "PRIVATE-TOKEN: ${GIT_TOKEN}" \
+        --data "source_branch=dev" \
+        --data "target_branch=staging" \
+        --data "title=${MR_TITLE}" \
+        --data "description=${MR_DESCRIPTION}" \
+        --data "remove_source_branch=false" \
+        "https://gitlab.kiv.zcu.cz/api/v4/projects/${CI_PROJECT_ID}/merge_requests")
+      
+      MR_URL=$(echo $RESPONSE | jq -r '.web_url // empty')
+      
+      if [ -n "$MR_URL" ]; then
+        echo "✅ Merge Request created successfully!"
+        echo "MR URL: $MR_URL"
+      else
+        echo "ℹ️ MR might already exist or error occurred"
+        echo "Check manually: https://gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops/-/merge_requests"
+      fi
 
   allow_failure: true
 
