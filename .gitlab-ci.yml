@@ -155,25 +155,39 @@ build-frontend:
     - echo "Frontend image built and pushed!"
 
 # =====================================
-# JOB 5: Update GitOps Repo - Backend (Dev)
+# JOB 5: Update GitOps Files (Dev)
 # =====================================
-update-gitops-dev-backend:
+update-gitops-dev:
   stage: update-gitops
   image: alpine:3.17
   only:
-    changes:
-      - src/backend/**/*
-      - .gitlab-ci.yml
     refs:
       - dev
   needs:
-    - build-backend
+    - job: build-backend
+      optional: true
+    - job: build-frontend
+      optional: true
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - ./scripts/update-image-tag-dev.sh backend "$IMAGE_TAG"
-    - echo "Backend tag updated to $IMAGE_TAG"
+    - |
+      # Check if backend was built (check if backend changes exist)
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/backend/"; then
+        echo "Updating backend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-dev.sh backend "$IMAGE_TAG"
+      else
+        echo "Backend not changed, skipping"
+      fi
+    - |
+      # Check if frontend was built (check if frontend changes exist)
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/frontend/"; then
+        echo "Updating frontend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-dev.sh frontend "$IMAGE_TAG"
+      else
+        echo "Frontend not changed, skipping"
+      fi
 
   artifacts:
     paths:
@@ -181,77 +195,39 @@ update-gitops-dev-backend:
     expire_in: 10 min
 
 # =====================================
-# JOB 5b: Update GitOps Repo - Frontend (Dev)
+# JOB 6: Update GitOps Files (Staging)
 # =====================================
-update-gitops-dev-frontend:
+update-gitops-staging:
   stage: update-gitops
   image: alpine:3.17
   only:
-    changes:
-      - src/frontend/**/*
-      - .gitlab-ci.yml
-    refs:
-      - dev
-  needs:
-    - build-frontend
-
-  script:
-    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
-    - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - ./scripts/update-image-tag-dev.sh frontend "$IMAGE_TAG"
-    - echo "Frontend tag updated to $IMAGE_TAG"
-
-  artifacts:
-    paths:
-      - charts/voting-system/values-dev.yaml
-    expire_in: 10 min
-
-# =====================================
-# JOB 6: Update GitOps Repo - Backend (Staging)
-# =====================================
-update-gitops-staging-backend:
-  stage: update-gitops
-  image: alpine:3.17
-  only:
-    changes:
-      - src/backend/**/*
-      - .gitlab-ci.yml
     refs:
       - staging
   needs:
-    - build-backend
+    - job: build-backend
+      optional: true
+    - job: build-frontend
+      optional: true
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - ./scripts/update-image-tag-staging.sh backend "$IMAGE_TAG"
-    - echo "Backend tag updated to $IMAGE_TAG"
-
-  artifacts:
-    paths:
-      - charts/voting-system/values-staging.yaml
-    expire_in: 10 min
-
-# =====================================
-# JOB 6b: Update GitOps Repo - Frontend (Staging)
-# =====================================
-update-gitops-staging-frontend:
-  stage: update-gitops
-  image: alpine:3.17
-  only:
-    changes:
-      - src/frontend/**/*
-      - .gitlab-ci.yml
-    refs:
-      - staging
-  needs:
-    - build-frontend
-
-  script:
-    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
-    - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
-    - echo "Frontend tag updated to $IMAGE_TAG"
+    - |
+      # Check if backend was built
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/backend/"; then
+        echo "Updating backend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-staging.sh backend "$IMAGE_TAG"
+      else
+        echo "Backend not changed, skipping"
+      fi
+    - |
+      # Check if frontend was built
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/frontend/"; then
+        echo "Updating frontend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
+      else
+        echo "Frontend not changed, skipping"
+      fi
 
   artifacts:
     paths:
@@ -268,7 +244,7 @@ commit-gitops-dev:
     refs:
       - dev
   needs:
-    - job: update-gitops-dev-backend
+    - job: update-gitops-dev
       optional: true
     - job: update-gitops-dev-frontend
       optional: true
@@ -295,9 +271,7 @@ commit-gitops-staging:
     refs:
       - staging
   needs:
-    - job: update-gitops-staging-backend
-      optional: true
-    - job: update-gitops-staging-frontend
+    - job: update-gitops-staging
       optional: true
 
   before_script:
