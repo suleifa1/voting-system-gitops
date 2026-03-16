@@ -116,7 +116,7 @@ build-backend:
     - docker:24-dind
 
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
     - echo "Branch: $CI_COMMIT_REF_NAME, Commit SHA: $CI_COMMIT_SHA"
 
   script:
