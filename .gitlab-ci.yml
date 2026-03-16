@@ -22,7 +22,37 @@ default:
     - kiv
 
 # =====================================
-# Global Variables
+# DEBUG: Check all Docker hosts in DinD
+# =====================================
+debug-docker-hosts:
+  stage: build
+  only:
+    - main
+
+  script:
+    - echo "=== Docker Info ==="
+    - docker info
+    - echo ""
+    - echo "=== Docker Version ==="
+    - docker version
+    - echo ""
+    - echo "=== DOCKER_HOST env ==="
+    - echo "DOCKER_HOST=$DOCKER_HOST"
+    - echo ""
+    - echo "=== Checking common Docker socket locations ==="
+    - ls -la /var/run/docker.sock 2>&1 || echo "Not at /var/run/docker.sock"
+    - ls -la /run/docker.sock 2>&1 || echo "Not at /run/docker.sock"
+    - ls -la /var/run/docker/ 2>&1 || echo "No /var/run/docker/"
+    - echo ""
+    - echo "=== All env vars with docker/host ==="
+    - env | grep -iE 'docker|host' || echo "No matches"
+    - echo ""
+    - echo "=== Testing docker commands ==="
+    - docker ps && echo "SUCCESS: docker ps works!"
+    - docker images && echo "SUCCESS: docker images works!"
+
+# =====================================
+# JOB 1: Backend Tests
 # =====================================
 backend-test:
   stage: test
