@@ -95,8 +95,6 @@ build-backend:
     - dev
     - staging
     - main
-  needs:
-    - backend-test
 
   before_script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
@@ -123,8 +121,6 @@ build-frontend:
     - dev
     - staging
     - main
-  needs:
-    - frontend-test
 
   before_script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
