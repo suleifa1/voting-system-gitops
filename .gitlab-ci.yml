@@ -19,7 +19,7 @@ variables:
 # =====================================
 debug-docker-info:
   stage: debug
-  image: docker:24-dind
+  image: alpine:3.17
   tags:
     - kiv
   only:
@@ -27,26 +27,18 @@ debug-docker-info:
     - staging
     - dev
 
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: "/certs"
-
-  services:
-    - docker:24-dind
-
   script:
-    - echo "=== Docker Info ==="
-    - docker --version
-    - docker info
+    - echo "=== Checking for Docker/Podman ==="
+    - which docker || echo "Docker not found"
+    - which podman || echo "Podman not found"
     - echo ""
-    - echo "=== Docker Images ==="
-    - docker images
+    - echo "=== Checking /var/run/ ==="
+    - ls -la /var/run/ | grep -E 'docker|podman' || echo "No docker/podman sockets found"
     - echo ""
-    - echo "=== Docker Containers ==="
-    - docker ps -a
-    - echo ""
-    - echo "=== Docker Socket ==="
-    - ls -la /var/run/docker.sock || echo "Socket not found at /var/run/docker.sock"
+    - echo "=== Checking installed packages ==="
+    - apk add --no-cache docker podman 2>&1 | head -20
+    - docker --version 2>/dev/null || echo "Docker not available"
+    - podman --version 2>/dev/null || echo "Podman not available"
 
 # =====================================
 # JOB 1: Backend Tests
@@ -123,7 +115,7 @@ frontend-test:
 # =====================================
 build-backend:
   stage: build
-  image: docker:24-dind
+  image: alpine:3.17
   tags:
     - kiv
   only:
@@ -131,35 +123,32 @@ build-backend:
     - staging
     - main
 
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: "/certs"
-
-  services:
-    - docker:24-dind
-
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
+    - apk add --no-cache podman
+    - mkdir -p ~/.config/containers
+    - echo '[registries.insecure]' > ~/.config/containers/registries.conf
+    - echo "registries = ['gitlab.kiv.zcu.cz:5000']" >> ~/.config/containers/registries.conf
+    - podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
     - echo 'Building backend image:' "$FULL_IMAGE"
-    - docker build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
+    - podman build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
     - echo 'Pushing image to registry...'
-    - docker push "$FULL_IMAGE"
+    - podman push "$FULL_IMAGE"
     - echo 'Backend image built and pushed!'
 
   after_script:
-    - docker logout "$REGISTRY" || true
+    - podman logout "$REGISTRY" || true
 
 # =====================================
 # JOB 4: Build Frontend Image
 # =====================================
 build-frontend:
   stage: build
-  image: docker:24-dind
+  image: alpine:3.17
   tags:
     - kiv
   only:
@@ -167,28 +156,25 @@ build-frontend:
     - staging
     - main
 
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: "/certs"
-
-  services:
-    - docker:24-dind
-
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
+    - apk add --no-cache podman
+    - mkdir -p ~/.config/containers
+    - echo '[registries.insecure]' > ~/.config/containers/registries.conf
+    - echo "registries = ['gitlab.kiv.zcu.cz:5000']" >> ~/.config/containers/registries.conf
+    - podman login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
     - echo 'Building frontend image:' "$FULL_IMAGE"
-    - docker build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
+    - podman build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
     - echo 'Pushing image to registry...'
-    - docker push "$FULL_IMAGE"
+    - podman push "$FULL_IMAGE"
     - echo 'Frontend image built and pushed!'
 
   after_script:
-    - docker logout "$REGISTRY" || true
+    - podman logout "$REGISTRY" || true
 
 # =====================================
 # JOB 5: Update GitOps Repo (Dev)
