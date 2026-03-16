@@ -109,7 +109,7 @@ build-backend:
       --destination "${FULL_IMAGE}"
       --cache=true
       --cache-ttl=24h
-      --snapshot-mode=redo
+      --snapshotMode=redo
       --use-new-run
       --compressed-caching=false
     - echo "Backend image built and pushed!"
@@ -140,7 +140,7 @@ build-frontend:
       --destination "${FULL_IMAGE}"
       --cache=true
       --cache-ttl=24h
-      --snapshot-mode=redo
+      --snapshotMode=redo
       --use-new-run
       --compressed-caching=false
     - echo "Frontend image built and pushed!"
