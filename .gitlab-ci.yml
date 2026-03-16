@@ -176,10 +176,9 @@ update-gitops-dev-backend:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - echo "Updating backend tag in values-dev.yaml:" "$IMAGE_TAG"
-    - sed -i "/^backend:/,/^frontend:/ s|tag: dev.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
+    - ./scripts/update-image-tag-dev.sh backend "$IMAGE_TAG"
     - git add charts/voting-system/values-dev.yaml
-    - git commit -m "ci: update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git commit -m "update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${CI_JOB_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
 
 # =====================================
@@ -205,10 +204,9 @@ update-gitops-dev-frontend:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - echo "Updating frontend tag in values-dev.yaml:" "$IMAGE_TAG"
-    - sed -i "/^frontend:/,/^cockroachdb:/ s|tag: dev.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
+    - ./scripts/update-image-tag-dev.sh frontend "$IMAGE_TAG"
     - git add charts/voting-system/values-dev.yaml
-    - git commit -m "ci: update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git commit -m "update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${CI_JOB_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
 
 # =====================================
@@ -234,10 +232,9 @@ update-gitops-staging-backend:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - echo "Updating backend tag in values-staging.yaml:" "$IMAGE_TAG"
-    - sed -i "/^backend:/,/^frontend:/ s|tag: staging.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
+    - ./scripts/update-image-tag-staging.sh backend "$IMAGE_TAG"
     - git add charts/voting-system/values-staging.yaml
-    - git commit -m "ci: update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git commit -m "update backend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${CI_JOB_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
 
 # =====================================
@@ -263,10 +260,9 @@ update-gitops-staging-frontend:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - echo "Updating frontend tag in values-staging.yaml:" "$IMAGE_TAG"
-    - sed -i "/^frontend:/,/^cockroachdb:/ s|tag: staging.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
+    - ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
     - git add charts/voting-system/values-staging.yaml
-    - git commit -m "ci: update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git commit -m "update frontend image tag to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
     - git push https://oauth2:${CI_JOB_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
 
 # =====================================
@@ -319,5 +315,4 @@ prod-notification:
     - echo 'Backend:' "$BACKEND_IMAGE"
     - echo 'Frontend:' "$FRONTEND_IMAGE"
     - echo 'Manual sync required in ArgoCD UI'
-    - echo 'https://argocd.kiv.zcu.cz/applications'
     - echo '====================================='
