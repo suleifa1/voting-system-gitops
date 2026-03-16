@@ -181,19 +181,9 @@ update-gitops-dev:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo 'Updating values-dev.yaml with new image tags...'
-    - sed -i "s|tag: dev-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-dev.yaml
-    - cat charts/voting-system/values-dev.yaml | grep -A 2 "backend:" | grep "tag:"
-    - echo 'Committing and pushing changes...'
-    - git add charts/voting-system/values-dev.yaml
-    - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git dev
-
-  only:
-    variables:
-      - $GIT_TOKEN
+    - echo 'Image tag:' "$IMAGE_TAG"
+    - echo 'Would update values-dev.yaml here'
+    - echo 'Would commit and push changes'
 
 # =====================================
 # JOB 6: Update GitOps Repo (Staging)
@@ -217,19 +207,9 @@ update-gitops-staging:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="staging-${SHORT_SHA}"
-    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo 'Updating values-staging.yaml with new image tags...'
-    - sed -i "s|tag: staging-.*|tag: ${IMAGE_TAG}|" charts/voting-system/values-staging.yaml
-    - cat charts/voting-system/values-staging.yaml | grep -A 2 "backend:" | grep "tag:"
-    - echo 'Committing and pushing changes...'
-    - git add charts/voting-system/values-staging.yaml
-    - git commit -m "ci: update backend/frontend image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
-    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git staging
-
-  only:
-    variables:
-      - $GIT_TOKEN
+    - echo 'Image tag:' "$IMAGE_TAG"
+    - echo 'Would update values-staging.yaml here'
+    - echo 'Would commit and push changes'
 
 # =====================================
 # JOB 7: Auto-Promote Dev to Staging
@@ -252,23 +232,10 @@ promote-to-staging:
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="dev-${SHORT_SHA}"
-    
-    - echo "🚀 Creating merge request dev → staging..."
-    - |
-      git clone https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git /tmp/repo
-      cd /tmp/repo
-      git config user.name "GitLab CI"
-      git config user.email "ci@gitlab.local"
-      git checkout -b promote-dev-to-staging-${SHORT_SHA} staging
-      git merge --no-ff dev -m "🚀 Auto-promote: dev → staging (${IMAGE_TAG})" || true
-      git push -o merge_request.create -o merge_request.target=staging https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git promote-dev-to-staging-${SHORT_SHA}
-    
-    - echo "✅ Merge request created!"
+    - echo 'Would create merge request dev -> staging'
+    - echo 'Image tag:' "$IMAGE_TAG"
 
   allow_failure: true
-  only:
-    variables:
-      - $GIT_TOKEN
 
 # =====================================
 # JOB 8: Production Notification
