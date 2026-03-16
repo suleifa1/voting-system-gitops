@@ -88,7 +88,7 @@ frontend-test:
 # =====================================
 build-backend:
   stage: build
-  image: alpine:3.17
+  image: gcr.io/kaniko-project/executor:latest
   tags:
     - kiv
   only:
@@ -99,31 +99,24 @@ build-backend:
     - backend-test
 
   before_script:
-    - apk add --no-cache docker
-    - dockerd &
-    - sleep 2
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
-
-  script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(echo -n ${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+
+  script:
     - echo 'Building backend image:' "$FULL_IMAGE"
-    - docker build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
-    - echo 'Pushing image to registry...'
-    - docker push "$FULL_IMAGE"
+    - /kaniko/executor --context src/backend/ --dockerfile src/backend/Dockerfile --destination "$FULL_IMAGE" --platform=linux/amd64
     - echo 'Backend image built and pushed!'
     - echo 'Image:' "$FULL_IMAGE"
-
-  after_script:
-    - docker logout $REGISTRY
 
 # =====================================
 # JOB 4: Build Frontend Image
 # =====================================
 build-frontend:
   stage: build
-  image: alpine:3.17
+  image: gcr.io/kaniko-project/executor:latest
   tags:
     - kiv
   only:
@@ -134,24 +127,17 @@ build-frontend:
     - frontend-test
 
   before_script:
-    - apk add --no-cache docker
-    - dockerd &
-    - sleep 2
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
-
-  script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(echo -n ${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+
+  script:
     - echo 'Building frontend image:' "$FULL_IMAGE"
-    - docker build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
-    - echo 'Pushing image to registry...'
-    - docker push "$FULL_IMAGE"
+    - /kaniko/executor --context src/frontend/ --dockerfile src/frontend/Dockerfile --destination "$FULL_IMAGE" --platform=linux/amd64
     - echo 'Frontend image built and pushed!'
     - echo 'Image:' "$FULL_IMAGE"
-
-  after_script:
-    - docker logout $REGISTRY
 
 # =====================================
 # JOB 5: Update GitOps Repo (Dev)
