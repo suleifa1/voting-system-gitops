@@ -14,13 +14,14 @@ variables:
   BACKEND_DOCKERFILE: src/backend/Dockerfile
   FRONTEND_DOCKERFILE: src/frontend/Dockerfile
 
-tags:
-  - kiv
-
-only:
-  - dev
-  - staging
-  - main
+default:
+  image: alpine:3.17
+  tags:
+    - kiv
+  only:
+    - dev
+    - staging
+    - main
 
 # =====================================
 # DEBUG: Check Docker Socket Access
