@@ -1,8 +1,8 @@
 # GitLab CI/CD Pipeline for Voting System
 
 stages:
-  - test
   - build
+  - test
   - update-gitops
   - promote
 
@@ -17,7 +17,7 @@ variables:
 # JOB 1: Backend Tests
 # =====================================
 backend-test:
-  stage: .disabled
+  stage: test
   image: alpine:3.17
   tags:
     - kiv
@@ -63,7 +63,7 @@ backend-test:
 # JOB 2: Frontend Tests
 # =====================================
 frontend-test:
-  stage: .disabled
+  stage: test
   image: node:18-alpine
   tags:
     - kiv
