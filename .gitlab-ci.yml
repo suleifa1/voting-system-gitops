@@ -105,11 +105,17 @@ build-backend:
       - staging
       - main
 
+  before_script:
+    # Install QEMU for cross-platform ARM64 builds on AMD64 runner
+    - mkdir -p /usr/bin
+    - wget -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
+    - chmod +x /usr/bin/qemu-aarch64-static
+
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building backend image with Kaniko:" "$FULL_IMAGE"
+    - echo "Building backend image with Kaniko (ARM64 via QEMU):" "$FULL_IMAGE"
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
@@ -140,11 +146,17 @@ build-frontend:
       - staging
       - main
 
+  before_script:
+    # Install QEMU for cross-platform ARM64 builds on AMD64 runner
+    - mkdir -p /usr/bin
+    - wget -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
+    - chmod +x /usr/bin/qemu-aarch64-static
+
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building frontend image with Kaniko:" "$FULL_IMAGE"
+    - echo "Building frontend image with Kaniko (ARM64 via QEMU):" "$FULL_IMAGE"
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
