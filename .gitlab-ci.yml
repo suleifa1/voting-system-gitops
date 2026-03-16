@@ -117,21 +117,18 @@ build-backend:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$REGISTRY"
-    - echo "Branch: $CI_COMMIT_REF_NAME, Commit SHA: $CI_COMMIT_SHA"
+    - echo "Branch:\ $CI_COMMIT_REF_NAME,\ Commit\ SHA:\ $CI_COMMIT_SHA"
 
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    
-    - echo "🐳 Building backend image: $FULL_IMAGE"
+    - echo 'Building backend image:' "$FULL_IMAGE"
     - docker build -t "$FULL_IMAGE" -f "$BACKEND_DOCKERFILE" src/backend/
-    
-    - echo "📤 Pushing image to registry..."
+    - echo 'Pushing image to registry...'
     - docker push "$FULL_IMAGE"
-    
-    - echo "✅ Backend image built and pushed!"
-    - echo "Image: $FULL_IMAGE"
+    - echo 'Backend image built and pushed!'
+    - echo 'Image:' "$FULL_IMAGE"
 
   after_script:
     - docker logout $REGISTRY
@@ -164,15 +161,12 @@ build-frontend:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    
-    - echo "🐳 Building frontend image: $FULL_IMAGE"
+    - echo 'Building frontend image:' "$FULL_IMAGE"
     - docker build -t "$FULL_IMAGE" -f "$FRONTEND_DOCKERFILE" src/frontend/
-    
-    - echo "📤 Pushing image to registry..."
+    - echo 'Pushing image to registry...'
     - docker push "$FULL_IMAGE"
-    
-    - echo "✅ Frontend image built and pushed!"
-    - echo "Image: $FULL_IMAGE"
+    - echo 'Frontend image built and pushed!'
+    - echo 'Image:' "$FULL_IMAGE"
 
   after_script:
     - docker logout $REGISTRY
