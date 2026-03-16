@@ -131,7 +131,6 @@ build-backend:
     - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf '%s:%s' '$CI_REGISTRY_USER' '$CI_REGISTRY_PASSWORD' | base64 -w0)\"}}}" > /kaniko/.docker/config.json
 
   script:
-    - echo "Building backend image: $FULL_IMAGE"
     - /kaniko/executor --context src/backend --dockerfile src/backend/Dockerfile --destination "$FULL_IMAGE" --insecure-registry "$REGISTRY"
     - echo "Backend image built and pushed!"
 
@@ -156,7 +155,7 @@ build-frontend:
     - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf '%s:%s' '$CI_REGISTRY_USER' '$CI_REGISTRY_PASSWORD' | base64 -w0)\"}}}" > /kaniko/.docker/config.json
 
   script:
-    - echo "Building frontend image: $FULL_IMAGE"
+    - echo "Building frontend image:" '$FULL_IMAGE'
     - /kaniko/executor --context src/frontend --dockerfile src/frontend/Dockerfile --destination "$FULL_IMAGE" --insecure-registry "$REGISTRY"
     - echo "Frontend image built and pushed!"
 
