@@ -5,6 +5,8 @@
 # Global settings
 global:
   namespace: voting-system
+  imagePullSecrets:
+    - name: gitlab-registry
 
 # Backend configuration
 backend:
