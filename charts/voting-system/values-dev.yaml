@@ -8,7 +8,7 @@ backend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-25b45da
+    tag: dev-cdbb650
     pullPolicy: Always
   
   resources:
@@ -23,7 +23,7 @@ frontend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-8ee5be7
+    tag: dev-cdbb650
     pullPolicy: Always
   
   resources:
