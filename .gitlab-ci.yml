@@ -94,9 +94,7 @@ frontend-test:
 # =====================================
 build-backend:
   stage: build
-  image: docker:24-dind
-  services:
-    - docker:24-dind
+  image: docker:24-cli
   only:
     changes:
       - src/backend/**/*
@@ -107,8 +105,7 @@ build-backend:
       - main
 
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: unix:///var/run/docker.sock
 
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
@@ -126,11 +123,11 @@ build-backend:
 # =====================================
 # JOB 4: Build Frontend Image (Docker)
 # =====================================
+# JOB 4: Build Frontend Image (Docker)
+# =====================================
 build-frontend:
   stage: build
-  image: docker:24-dind
-  services:
-    - docker:24-dind
+  image: docker:24-cli
   only:
     changes:
       - src/frontend/**/*
@@ -141,8 +138,7 @@ build-frontend:
       - main
 
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: unix:///var/run/docker.sock
 
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
