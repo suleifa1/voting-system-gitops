@@ -16,7 +16,7 @@ variables:
 
 default:
   tags:
-    - voting-system
+    - kiv
 
 # =====================================
 # JOB 1: Backend Tests
@@ -94,6 +94,8 @@ frontend-test:
 # =====================================
 build-backend:
   stage: build
+  tags:
+    - voting-system
   image: docker:24-cli
   only:
     changes:
@@ -124,6 +126,8 @@ build-backend:
 # =====================================
 build-frontend:
   stage: build
+  tags:
+    - voting-system
   image: docker:24-cli
   only:
     changes:

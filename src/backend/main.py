@@ -45,6 +45,7 @@ api_router.include_router(surveys_router)
 async def api_root():
     return {"message": "Poll App API is running!"}
 
+
 @api_router.get("/health")
 async def health_check():
     """Health check endpoint with database connectivity test"""
