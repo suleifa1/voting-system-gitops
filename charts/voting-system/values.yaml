@@ -13,8 +13,8 @@ backend:
   replicaCount: 2
   
   image:
-    repository: ghcr.io/suleifa1/backend
-    tag: latest
+    repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-backend
+    tag: main-latest
     pullPolicy: Always
   
   service:
@@ -52,8 +52,8 @@ frontend:
   replicaCount: 2
   
   image:
-    repository: ghcr.io/suleifa1/frontend
-    tag: latest
+    repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-frontend
+    tag: main-latest
     pullPolicy: Always
   
   service:
@@ -179,8 +179,8 @@ initDbJob:
 migrateJob:
   enabled: true
   image:
-    repository: ghcr.io/suleifa1/backend
-    tag: latest
+    repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-backend
+    tag: main-latest
     pullPolicy: Always
   restartPolicy: OnFailure
   backoffLimit: 3
