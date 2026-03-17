@@ -16,7 +16,7 @@ variables:
 
 default:
   tags:
-    - kiv
+    - voting-system
 
 # =====================================
 # JOB 1: Backend Tests
@@ -90,13 +90,13 @@ frontend-test:
   allow_failure: true
 
 # =====================================
-# JOB 3: Build Backend Image (Kaniko)
+# JOB 3: Build Backend Image (Docker)
 # =====================================
 build-backend:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.9.0-debug
-    entrypoint: [""]
+  image: docker:24-dind
+  services:
+    - docker:24-dind
   only:
     changes:
       - src/backend/**/*
@@ -106,56 +106,55 @@ build-backend:
       - staging
       - main
 
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
+
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building backend image with Kaniko:" "$FULL_IMAGE"
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}/src/backend"
-      --dockerfile "${CI_PROJECT_DIR}/${BACKEND_DOCKERFILE}"
-      --destination "${FULL_IMAGE}"
-      --cache=true
-      --cache-ttl=24h
-      --snapshotMode=redo
-      --use-new-run
-      --compressed-caching=false
+    - echo "Building backend image (native ARM64):" "$FULL_IMAGE"
+    - cd src/backend
+    - docker build -t "$FULL_IMAGE" -f ../../${BACKEND_DOCKERFILE} .
+    - docker push "$FULL_IMAGE"
     - echo "Backend image built and pushed!"
 
 # =====================================
-# JOB 4: Build Frontend Image (Kaniko)
+# JOB 4: Build Frontend Image (Docker)
 # =====================================
 build-frontend:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.9.0-debug
-    entrypoint: [""]
+  image: docker:24-dind
+  services:
+    - docker:24-dind
   only:
     changes:
       - src/frontend/**/*
+      - .gitlab-ci.yml
     refs:
       - dev
       - staging
       - main
 
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_DRIVER: overlay2
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
+
   script:
     - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
     - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
     - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
-    - echo "Building frontend image with Kaniko:" "$FULL_IMAGE"
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}/src/frontend"
-      --dockerfile "${CI_PROJECT_DIR}/${FRONTEND_DOCKERFILE}"
-      --destination "${FULL_IMAGE}"
-      --cache=true
-      --cache-ttl=24h
-      --snapshotMode=redo
-      --use-new-run
-      --compressed-caching=false
+    - echo "Building frontend image (native ARM64):" "$FULL_IMAGE"
+    - cd src/frontend
+    - docker build -t "$FULL_IMAGE" -f ../../${FRONTEND_DOCKERFILE} .
+    - docker push "$FULL_IMAGE"
     - echo "Frontend image built and pushed!"
 
 # =====================================
