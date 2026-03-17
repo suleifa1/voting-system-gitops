@@ -98,7 +98,6 @@ build-backend:
   only:
     changes:
       - src/backend/**/*
-      - .gitlab-ci.yml
     refs:
       - dev
       - staging
@@ -123,15 +122,12 @@ build-backend:
 # =====================================
 # JOB 4: Build Frontend Image (Docker)
 # =====================================
-# JOB 4: Build Frontend Image (Docker)
-# =====================================
 build-frontend:
   stage: build
   image: docker:24-cli
   only:
     changes:
       - src/frontend/**/*
-      - .gitlab-ci.yml
     refs:
       - dev
       - staging
@@ -153,8 +149,6 @@ build-frontend:
     - docker push "$FULL_IMAGE"
     - echo "Frontend image built and pushed!"
 
-# =====================================
-# JOB 5: Update GitOps Files (Dev)
 # =====================================
 # JOB 5: Update GitOps Files (Dev)
 # =====================================
@@ -335,28 +329,3 @@ promote-to-staging:
       fi
 
   allow_failure: true
-
-# =====================================
-# JOB 8: Production Notification
-# =====================================
-prod-notification:
-  stage: promote
-  image: alpine:3.17
-  only:
-    - main
-  needs:
-    - job: build-backend
-      optional: true
-    - job: build-frontend
-      optional: true
-
-  script:
-    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
-    - export BACKEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:main-${SHORT_SHA}"
-    - export FRONTEND_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:main-${SHORT_SHA}"
-    - echo '====================================='
-    - echo 'Backend image built for PRODUCTION!'
-    - echo 'Backend:' "$BACKEND_IMAGE"
-    - echo 'Frontend:' "$FRONTEND_IMAGE"
-    - echo 'Manual sync required in ArgoCD UI'
-    - echo '====================================='
