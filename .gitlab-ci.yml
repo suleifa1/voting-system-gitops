@@ -108,7 +108,8 @@ build-backend:
   before_script:
     # Install QEMU for cross-platform ARM64 builds on AMD64 runner
     - mkdir -p /usr/bin
-    - wget --no-check-certificate -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
+    # Try curl first, fallback to busybox wget with different options
+    - curl -kL https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static -o /usr/bin/qemu-aarch64-static || busybox wget --no-check-certificate -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
     - chmod +x /usr/bin/qemu-aarch64-static
 
   script:
@@ -149,7 +150,8 @@ build-frontend:
   before_script:
     # Install QEMU for cross-platform ARM64 builds on AMD64 runner
     - mkdir -p /usr/bin
-    - wget --no-check-certificate -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
+    # Try curl first, fallback to busybox wget with different options
+    - curl -kL https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static -o /usr/bin/qemu-aarch64-static || busybox wget --no-check-certificate -O /usr/bin/qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static
     - chmod +x /usr/bin/qemu-aarch64-static
 
   script:
