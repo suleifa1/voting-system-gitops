@@ -16,7 +16,7 @@ backend:
   
   image:
     repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-backend
-    tag: main-latest
+    tag: ""  # Must be overridden in values-dev/staging/prod.yaml
     pullPolicy: Always
   
   service:
@@ -55,7 +55,7 @@ frontend:
   
   image:
     repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-frontend
-    tag: main-latest
+    tag: ""  # Must be overridden in values-dev/staging/prod.yaml
     pullPolicy: Always
   
   service:
@@ -182,7 +182,8 @@ migrateJob:
   enabled: true
   image:
     repository: gitlab.kiv.zcu.cz:5000/zaverecne-prace-voting-system-gitops/voting-system-backend
-    tag: main-latest
+    # Tag inherited from backend.image.tag in environment-specific values
+    tag: "dev-cdbb650"  # Will be overridden by values-dev/staging/prod
     pullPolicy: Always
   restartPolicy: OnFailure
   backoffLimit: 3
