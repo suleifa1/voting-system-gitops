@@ -20,9 +20,9 @@ spec:
         app: {{ .Values.backend.name }}
         release: {{ .Release.Name }}
     spec:
-      {{- if .Values.global.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      # {{- if .Values.global.imagePullSecrets }}
+      # imagePullSecrets:
+      #   {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
       {{- end }}
       containers:
       - name: {{ .Values.backend.name }}
