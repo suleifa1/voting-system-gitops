@@ -37,6 +37,11 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config
+        {{- if .Values.sealedSecret.enabled }}
         - secretRef:
             name: {{ .Release.Name }}-sealed-secret
+        {{- else }}
+        - secretRef:
+            name: {{ .Release.Name }}-secret
+        {{- end }}
 {{- end }}
