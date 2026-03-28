@@ -114,7 +114,7 @@ cockroachdb:
   persistence:
     enabled: true
     size: 5Gi
-    storageClass: standard  # Явно указываем StorageClass
+    storageClass: local-path  # Явно указываем StorageClass
     accessMode: ReadWriteOnce
   
   env:
