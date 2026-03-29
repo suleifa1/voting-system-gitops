@@ -13,7 +13,6 @@ from src.database import create_tables
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Application startup")
-    # Таблицы уже созданы через Alembic, ничего не делаем
     yield
     # Shutdown  
     print("🛑 Application shutdown")
@@ -26,7 +25,6 @@ main_app = FastAPI(
     lifespan=lifespan
 )
 
-# Добавляем CORS middleware
 main_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for Ingress
@@ -38,7 +36,6 @@ main_app.add_middleware(
 # Create API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Подключаем роутеры к API router
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(polls_router, prefix="/polls", tags=["polls"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
@@ -47,6 +44,7 @@ api_router.include_router(surveys_router)
 @api_router.get("/")
 async def api_root():
     return {"message": "Poll App API is running!"}
+
 
 @api_router.get("/health")
 async def health_check():
@@ -70,8 +68,7 @@ async def health_check():
 
 # Mount API router to main app
 main_app.include_router(api_router)
-
-# Alias for uvicorn
+ 
 app = main_app
 
 if __name__ == "__main__":

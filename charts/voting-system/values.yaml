@@ -5,6 +5,8 @@
 # Global settings
 global:
   namespace: voting-system
+  imagePullSecrets:
+    - name: gitlab-registry
 
 # Backend configuration
 backend:
@@ -14,7 +16,7 @@ backend:
   
   image:
     repository: ghcr.io/suleifa1/backend
-    tag: latest
+    tag: ""  # Must be overridden in values-dev/staging/prod.yaml
     pullPolicy: Always
   
   service:
@@ -53,7 +55,7 @@ frontend:
   
   image:
     repository: ghcr.io/suleifa1/frontend
-    tag: latest
+    tag: ""  # Must be overridden in values-dev/staging/prod.yaml
     pullPolicy: Always
   
   service:
@@ -112,7 +114,7 @@ cockroachdb:
   persistence:
     enabled: true
     size: 5Gi
-    storageClass: ""  # Use default storage class
+    storageClass: local-path  # Явно указываем StorageClass
     accessMode: ReadWriteOnce
   
   env:
@@ -180,7 +182,8 @@ migrateJob:
   enabled: true
   image:
     repository: ghcr.io/suleifa1/backend
-    tag: latest
+    # Tag inherited from backend.image.tag in environment-specific values
+    tag: "dev-a0d8a28"  # Will be overridden by values-dev/staging/prod
     pullPolicy: Always
   restartPolicy: OnFailure
   backoffLimit: 3

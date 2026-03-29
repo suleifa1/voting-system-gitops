@@ -1,24 +1,22 @@
-{{- if and .Values.ingress.enabled .Values.ingress.nodePort.enabled }}
+{{- if .Values.ingress.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-ingress-nodeport
+  name: {{ .Release.Name }}-ingress-lb
   namespace: {{ .Values.global.namespace }}
   labels:
     app: ingress
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 80
-    nodePort: {{ .Values.ingress.nodePort.httpPort }}
     protocol: TCP
     name: http
   - port: 443
     targetPort: 443
-    nodePort: {{ .Values.ingress.nodePort.httpsPort }}
     protocol: TCP
     name: https
   selector:
