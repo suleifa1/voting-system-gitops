@@ -8,8 +8,10 @@ import {
   SurveyResults,
 } from './types';
 
-// Next.js basePath automatically handles path prefixes (/dev/, /staging/, etc.)
-const API_BASE_URL = '/api';
+// basePath is set at build time via NEXT_PUBLIC_BASE_PATH
+// axios is NOT affected by Next.js basePath, so we must add it manually
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const API_BASE_URL = `${BASE_PATH}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

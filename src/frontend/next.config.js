@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  trailingSlash: true,
   async rewrites() {
     // Only for local development (when backend runs on different port)
     if (process.env.NODE_ENV === 'development') {
