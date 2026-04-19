@@ -33,6 +33,18 @@ frontend:
     limits:
       memory: "256Mi"
       cpu: "250m"
+
+  livenessProbe:
+    enabled: true
+    path: /dev/
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /dev/
+    initialDelaySeconds: 10
+    periodSeconds: 5
   
   env:
     NODE_ENV: "development"
