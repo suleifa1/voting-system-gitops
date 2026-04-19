@@ -15,7 +15,7 @@ spec:
   - port: {{ .Values.cockroachdb.service.grpcPort }}
     targetPort: {{ .Values.cockroachdb.service.grpcPort }}
     protocol: TCP
-    name: grpc
+    name: tcp-postgresql
   - port: {{ .Values.cockroachdb.service.httpPort }}
     targetPort: {{ .Values.cockroachdb.service.httpPort }}
     protocol: TCP
