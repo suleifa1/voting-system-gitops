@@ -23,7 +23,7 @@ frontend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-a0d8a28
+    tag: dev-1fce8c6
     pullPolicy: Always
   
   resources:
