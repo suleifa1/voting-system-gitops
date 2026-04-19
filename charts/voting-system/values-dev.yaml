@@ -57,7 +57,8 @@ ingress:
 istio:
   enabled: true
   hosts:
-    - "*"
+  - backend
+  - frontend
 
 secret:
   SECRET_KEY: "dev-secret-key-not-for-production"
