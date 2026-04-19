@@ -57,7 +57,6 @@ ingress:
 istio:
   enabled: true
   hosts:
-    - "dev.voting.local"
     - "*"
 
 secret:
