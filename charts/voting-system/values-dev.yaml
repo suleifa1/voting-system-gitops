@@ -36,6 +36,7 @@ frontend:
   
   env:
     NODE_ENV: "development"
+    NEXT_PUBLIC_API_URL: "/dev/api"
 
 cockroachdb:
   replicaCount: 1
