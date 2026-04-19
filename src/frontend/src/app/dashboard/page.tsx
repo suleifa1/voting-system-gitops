@@ -6,6 +6,8 @@ import { User } from '@/services/types';
 import PollsList from '@/components/polls/PollsList';
 import styles from './page.module.css';
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,11 +19,11 @@ export default function Dashboard() {
           const userData = await authService.verify();
           setUser(userData);
         } else {
-          window.location.href = '/';
+          window.location.href = BASE_PATH + '/';
         }
       } catch (error) {
         authService.logout();
-        window.location.href = '/';
+        window.location.href = BASE_PATH + '/';
       } finally {
         setLoading(false);
       }
@@ -32,7 +34,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     authService.logout();
-    window.location.href = '/';
+    window.location.href = BASE_PATH + '/';
   };
 
   if (loading) {

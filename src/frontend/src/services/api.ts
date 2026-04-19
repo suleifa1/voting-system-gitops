@@ -35,7 +35,7 @@ api.interceptors.response.use(
       const url = error.config?.url || '';
       if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
         localStorage.removeItem('token');
-        window.location.href = '/';
+        window.location.href = BASE_PATH + '/';
       }
     }
     return Promise.reject(error);
