@@ -52,15 +52,13 @@ cockroachdb:
     size: 2Gi
 
 ingress:
+  enabled: false
+
+istio:
+  enabled: true
   hosts:
-    - host: dev.voting.local
-      paths:
-        - path: /api
-          pathType: Prefix
-          backend: backend
-        - path: /
-          pathType: Prefix
-          backend: frontend
+    - "dev.voting.local"
+    - "*"
 
 secret:
   SECRET_KEY: "dev-secret-key-not-for-production"
