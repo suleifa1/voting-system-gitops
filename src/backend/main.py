@@ -49,14 +49,13 @@ async def api_root():
 @api_router.get("/health")
 async def health_check():
     """Health check endpoint with database connectivity test"""
-    from src.database.connection import get_db
+    from src.database.connection import engine
     from sqlalchemy import text
     
     db_status = "unknown"
     try:
-        db = next(get_db())
-        # Test database connection
-        db.execute(text("SELECT 1"))
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
         db_status = f"disconnected: {str(e)}"
