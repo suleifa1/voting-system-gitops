@@ -8,9 +8,8 @@ import {
   SurveyResults,
 } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL !== undefined 
-  ? process.env.NEXT_PUBLIC_API_URL 
-  : 'http://localhost:8000';
+// Next.js basePath automatically handles path prefixes (/dev/, /staging/, etc.)
+const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

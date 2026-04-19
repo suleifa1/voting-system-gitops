@@ -33,6 +33,10 @@ frontend:
     limits:
       memory: "1Gi"
       cpu: "1000m"
+  
+  env:
+    NODE_ENV: "production"
+    # No NEXT_PUBLIC_BASE_PATH for production (root path)
 
 cockroachdb:
   replicaCount: 1  # Single node for production (start-single-node mode)
@@ -49,22 +53,13 @@ cockroachdb:
     size: 10Gi
 
 ingress:
-  className: "nginx-prod"
+  enabled: false
+
+istio:
+  enabled: true
   hosts:
-    - host: voting.local  # Production domain
-      paths:
-        - path: /api
-          pathType: Prefix
-          backend: backend
-        - path: /
-          pathType: Prefix
-          backend: frontend
-  
-  # Enable TLS in production
-  # tls:
-  #   - secretName: voting-tls
-  #     hosts:
-  #       - voting.local
+  - backend
+  - frontend
 
 # Use regular Secret (placeholder) - will be overridden by SealedSecret
 secret:

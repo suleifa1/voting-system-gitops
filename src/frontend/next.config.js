@@ -1,13 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   async rewrites() {
-    return [
-      {
-        source: '/api/auth/:path*',
-        destination: 'http://localhost:3001/api/auth/:path*',
-      },
-    ]
+    // Only for local development (when backend runs on different port)
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:8000/api/:path*',
+        },
+      ]
+    }
+    return []
   },
 }
 

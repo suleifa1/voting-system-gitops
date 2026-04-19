@@ -10,6 +10,14 @@ backend:
   image:
     tag: staging-f145ae6
     pullPolicy: Always
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
 
 frontend:
   replicaCount: 2
@@ -17,6 +25,18 @@ frontend:
   image:
     tag: staging-4db5e03
     pullPolicy: Always
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  env:
+    NODE_ENV: "production"
+    NEXT_PUBLIC_BASE_PATH: "/staging"
 
 cockroachdb:
   replicaCount: 1
@@ -25,16 +45,13 @@ cockroachdb:
     size: 5Gi
 
 ingress:
-  className: "nginx-staging"
+  enabled: false
+
+istio:
+  enabled: true
   hosts:
-    - host: staging.voting.local
-      paths:
-        - path: /api
-          pathType: Prefix
-          backend: backend
-        - path: /
-          pathType: Prefix
-          backend: frontend
+  - backend
+  - frontend
 
 # Staging secrets - USE SEALED SECRETS OR EXTERNAL SECRETS
 secret:
