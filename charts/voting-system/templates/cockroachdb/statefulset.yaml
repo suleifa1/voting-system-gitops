@@ -27,7 +27,7 @@ spec:
         imagePullPolicy: {{ .Values.cockroachdb.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.cockroachdb.service.grpcPort }}
-          name: grpc
+          name: tcp-postgresql
         - containerPort: {{ .Values.cockroachdb.service.httpPort }}
           name: http
         command:

@@ -30,9 +30,6 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to login page if:
-    // 1. Response is 401
-    // 2. NOT from /auth/login or /auth/register endpoints (those are intentional auth errors)
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
       if (!url.includes('/auth/login') && !url.includes('/auth/register')) {

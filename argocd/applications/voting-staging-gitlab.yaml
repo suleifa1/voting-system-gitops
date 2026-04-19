@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: voting-system-staging-gitlab
+  namespace: argocd
+  labels:
+    environment: staging
+    source: gitlab
+spec:
+  project: default
+  
+  source:
+    repoURL: https://gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git
+    targetRevision: staging
+    path: charts/voting-system
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-staging.yaml
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

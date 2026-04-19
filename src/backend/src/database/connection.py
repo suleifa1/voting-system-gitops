@@ -10,7 +10,7 @@ DB_USER = os.getenv("DB_USER", "root")
 DB_NAME = os.getenv("DB_NAME", "poll_app")
 
 # URL для psycopg2 async (поддерживается CockroachDB)
-ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
 
 # URL для psycopg2 (с sslmode для Alembic)
 SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
