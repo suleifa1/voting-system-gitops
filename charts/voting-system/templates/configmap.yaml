@@ -14,7 +14,6 @@ data:
   # Database
   DB_HOST: {{ .Values.configMap.DB_HOST | quote }}
   DB_PORT: {{ .Values.configMap.DB_PORT | quote }}
-  DB_USER: {{ .Values.configMap.DB_USER | quote }}
   DB_NAME: {{ .Values.configMap.DB_NAME | quote }}
   
   # Frontend

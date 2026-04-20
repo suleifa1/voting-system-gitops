@@ -171,21 +171,22 @@ serviceEntry:
     port: 26257
     address: cockroachdb.database.svc.cluster.local
 
-# ConfigMap data
+# ConfigMap data (non-sensitive)
 configMap:
   DB_HOST: "database"
   DB_PORT: "26257"
-  DB_USER: "root"
   DB_NAME: "poll_app"
   COCKROACH_DATABASE: "poll_app"
 
-# Secret data (base values - override in environment-specific files)
+# Secret data (sensitive - override in environment-specific files or use SealedSecret)
 # WARNING: These are PLACEHOLDER values. Override with real secrets via:
 # - Sealed Secrets (recommended for GitOps)
 # - External Secrets Operator
 # - Manual kubectl create secret
 secret:
   SECRET_KEY: "PLACEHOLDER_OVERRIDE_THIS_VALUE"
+  DB_USER: "root"          # Override per env: app_dev / app_staging / app_prod
+  DB_PASSWORD: ""          # Override per env with real password
 
 # Init DB job (creates database before migrations)
 initDbJob:

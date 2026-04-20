@@ -42,7 +42,12 @@ spec:
         - name: DB_PORT
           value: "{{ $.Values.cockroachdb.service.grpcPort }}"
         - name: DB_USER
-          value: "root"
+          value: "app_{{ .schema }}"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $.Release.Name }}-db-users
+              key: password-{{ .schema }}
         - name: DB_NAME
           value: "{{ $.Values.database.name }}"
         - name: DB_SCHEMA

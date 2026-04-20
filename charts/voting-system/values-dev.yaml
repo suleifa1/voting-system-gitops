@@ -78,3 +78,5 @@ istio:
 
 secret:
   SECRET_KEY: "dev-secret-key-not-for-production"
+  DB_USER: "app_dev"
+  DB_PASSWORD: "dev-db-password-change-me"  # должен совпадать с cockroachdb chart schemas[dev].password
