@@ -13,7 +13,6 @@ from src.database import create_tables
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Application startup")
-    # Таблицы уже созданы через Alembic, ничего не делаем
     yield
     # Shutdown  
     print("🛑 Application shutdown")
@@ -26,7 +25,6 @@ main_app = FastAPI(
     lifespan=lifespan
 )
 
-# Добавляем CORS middleware
 main_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for Ingress
@@ -38,7 +36,6 @@ main_app.add_middleware(
 # Create API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Подключаем роутеры к API router
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(polls_router, prefix="/polls", tags=["polls"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
@@ -48,17 +45,17 @@ api_router.include_router(surveys_router)
 async def api_root():
     return {"message": "Poll App API is running!"}
 
+
 @api_router.get("/health")
 async def health_check():
     """Health check endpoint with database connectivity test"""
-    from src.database.connection import get_db
+    from src.database.connection import engine
     from sqlalchemy import text
     
     db_status = "unknown"
     try:
-        db = next(get_db())
-        # Test database connection
-        db.execute(text("SELECT 1"))
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
         db_status = f"disconnected: {str(e)}"
@@ -70,8 +67,7 @@ async def health_check():
 
 # Mount API router to main app
 main_app.include_router(api_router)
-
-# Alias for uvicorn
+ 
 app = main_app
 
 if __name__ == "__main__":

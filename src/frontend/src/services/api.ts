@@ -8,9 +8,10 @@ import {
   SurveyResults,
 } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL !== undefined 
-  ? process.env.NEXT_PUBLIC_API_URL 
-  : 'http://localhost:8000';
+// basePath is set at build time via NEXT_PUBLIC_BASE_PATH
+// axios is NOT affected by Next.js basePath, so we must add it manually
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const API_BASE_URL = `${BASE_PATH}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,14 +31,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to login page if:
-    // 1. Response is 401
-    // 2. NOT from /auth/login or /auth/register endpoints (those are intentional auth errors)
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
       if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
         localStorage.removeItem('token');
-        window.location.href = '/';
+        window.location.href = BASE_PATH + '/';
       }
     }
     return Promise.reject(error);

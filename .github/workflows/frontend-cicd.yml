@@ -100,6 +100,17 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
       
+      - name: Determine basePath for environment
+        id: basepath
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "basepath=/dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "basepath=/staging" >> $GITHUB_OUTPUT
+          else
+            echo "basepath=" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5
@@ -112,6 +123,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_BASE_PATH=${{ steps.basepath.outputs.basepath }}
       
       - name: Image info
         run: |

@@ -23,11 +23,13 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
 COPY . .
 
+# Build argument for basePath (must be set during docker build)
+ARG NEXT_PUBLIC_BASE_PATH=""
+
 # Set production environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# API URL - relative path for Ingress routing
-ENV NEXT_PUBLIC_API_URL="/api"
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 
 # Build Next.js application
 RUN npm run build

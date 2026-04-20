@@ -10,12 +10,14 @@ interface AuthWidgetProps {
   onAuthSuccess?: () => void;
 }
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export default function AuthWidget({ onAuthSuccess }: AuthWidgetProps) {
   const [mode, setMode] = useState<AuthMode>('login');
 
   const handleAuthSuccess = () => {
     onAuthSuccess?.();
-    window.location.href = '/dashboard';
+    window.location.href = BASE_PATH + '/dashboard';
   };
 
   return (

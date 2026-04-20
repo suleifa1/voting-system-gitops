@@ -1,0 +1,335 @@
+# GitLab CI/CD Pipeline for Voting System
+
+stages:
+  - test
+  - build
+  - update-gitops
+  - commit-gitops
+  - promote
+
+variables:
+  REGISTRY: gitlab.kiv.zcu.cz:5000
+  BACKEND_IMAGE_NAME: voting-system-backend
+  FRONTEND_IMAGE_NAME: voting-system-frontend
+  BACKEND_DOCKERFILE: src/backend/Dockerfile
+  FRONTEND_DOCKERFILE: src/frontend/Dockerfile
+
+default:
+  tags:
+    - kiv
+
+# =====================================
+# JOB 1: Backend Tests
+# =====================================
+backend-test:
+  stage: test
+  image: alpine:3.17
+  only:
+    changes:
+      - src/backend/**/*
+    refs:
+      - dev
+      - staging
+      - main
+  services:
+    - postgres:15
+
+  variables:
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_pass
+    POSTGRES_DB: test_db
+    POSTGRES_HOST_AUTH_METHOD: trust
+    PYTHONUNBUFFERED: "1"
+
+  before_script:
+    - apk add --no-cache python3 py3-pip postgresql-client
+    - cd src/backend
+    - pip install --no-cache-dir -r requirements.txt pytest httpx
+
+  script:
+    - echo 'Running backend tests...'
+    - pytest tests/ -v --tb=short
+    - echo 'Backend tests passed!'
+
+  artifacts:
+    reports:
+      junit: src/backend/pytest-report.xml
+    paths:
+      - src/backend/pytest-report.xml
+    expire_in: 1 week
+    when: always
+
+  cache:
+    paths:
+      - .cache/pip
+    key: $CI_COMMIT_REF_SLUG
+
+# =====================================
+# JOB 2: Frontend Tests
+# =====================================
+frontend-test:
+  stage: test
+  image: node:18-alpine
+  only:
+    changes:
+      - src/frontend/**/*
+    refs:
+      - dev
+      - staging
+      - main
+
+  before_script:
+    - cd src/frontend
+    - npm ci
+
+  script:
+    - echo 'Running frontend tests...'
+    - npm run test:ci || true
+    - echo 'Frontend tests completed!'
+
+  allow_failure: true
+
+# =====================================
+# JOB 3: Build Backend Image (Docker)
+# =====================================
+build-backend:
+  stage: build
+  tags:
+    - voting-system
+  image: docker:24-cli
+  only:
+    changes:
+      - src/backend/**/*
+    refs:
+      - dev
+      - staging
+      - main
+
+  variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
+    - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - echo "Building backend image (native ARM64):" "$FULL_IMAGE"
+    - cd src/backend
+    - docker build -t "$FULL_IMAGE" -f ../../${BACKEND_DOCKERFILE} .
+    - docker push "$FULL_IMAGE"
+    - echo "Backend image built and pushed!"
+
+# =====================================
+# JOB 4: Build Frontend Image (Docker)
+# =====================================
+build-frontend:
+  stage: build
+  tags:
+    - voting-system
+  image: docker:24-cli
+  only:
+    changes:
+      - src/frontend/**/*
+    refs:
+      - dev
+      - staging
+      - main
+
+  variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $REGISTRY
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="${CI_COMMIT_REF_NAME}-${SHORT_SHA}"
+    - export FULL_IMAGE="${REGISTRY}/${CI_PROJECT_PATH_SLUG}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+    - echo "Building frontend image (native ARM64):" "$FULL_IMAGE"
+    - cd src/frontend
+    - docker build -t "$FULL_IMAGE" -f ../../${FRONTEND_DOCKERFILE} .
+    - docker push "$FULL_IMAGE"
+    - echo "Frontend image built and pushed!"
+
+# =====================================
+# JOB 5: Update GitOps Files (Dev)
+# =====================================
+update-gitops-dev:
+  stage: update-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - dev
+  needs:
+    - job: build-backend
+      optional: true
+    - job: build-frontend
+      optional: true
+
+  before_script:
+    - apk add --no-cache git
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    - |
+      # Check if backend was built (check if backend changes exist)
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/backend/"; then
+        echo "Updating backend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-dev.sh backend "$IMAGE_TAG"
+      else
+        echo "Backend not changed, skipping"
+      fi
+    - |
+      # Check if frontend was built (check if frontend changes exist)
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/frontend/"; then
+        echo "Updating frontend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-dev.sh frontend "$IMAGE_TAG"
+      else
+        echo "Frontend not changed, skipping"
+      fi
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-dev.yaml
+    expire_in: 10 min
+
+# =====================================
+# JOB 6: Update GitOps Files (Staging)
+# =====================================
+update-gitops-staging:
+  stage: update-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - staging
+  needs:
+    - job: build-backend
+      optional: true
+    - job: build-frontend
+      optional: true
+
+  before_script:
+    - apk add --no-cache git
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="staging-${SHORT_SHA}"
+    - |
+      # Check if backend was built
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/backend/"; then
+        echo "Updating backend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-staging.sh backend "$IMAGE_TAG"
+      else
+        echo "Backend not changed, skipping"
+      fi
+    - |
+      # Check if frontend was built
+      if git diff --name-only HEAD~1 HEAD | grep -q "^src/frontend/"; then
+        echo "Updating frontend tag to $IMAGE_TAG"
+        ./scripts/update-image-tag-staging.sh frontend "$IMAGE_TAG"
+      else
+        echo "Frontend not changed, skipping"
+      fi
+
+  artifacts:
+    paths:
+      - charts/voting-system/values-staging.yaml
+    expire_in: 10 min
+
+# =====================================
+# JOB 6c: Commit and Push Changes (Dev)
+# =====================================
+commit-gitops-dev:
+  stage: commit-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - dev
+  needs:
+    - job: update-gitops-dev
+      optional: true
+    - job: update-gitops-dev-frontend
+      optional: true
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    - git add charts/voting-system/values-dev.yaml || true
+    - git commit -m "update image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:dev
+
+# =====================================
+# JOB 6d: Commit and Push Changes (Staging)
+# =====================================
+commit-gitops-staging:
+  stage: commit-gitops
+  image: alpine:3.17
+  only:
+    refs:
+      - staging
+  needs:
+    - job: update-gitops-staging
+      optional: true
+
+  before_script:
+    - apk add --no-cache git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.local"
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="staging-${SHORT_SHA}"
+    - git add charts/voting-system/values-staging.yaml || true
+    - git commit -m "update image tags to ${IMAGE_TAG} [skip ci]" || echo "No changes to commit"
+    - git push https://oauth2:${GIT_TOKEN}@gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git HEAD:staging
+
+# =====================================
+# JOB 7: Auto-Create MR Dev to Staging
+# =====================================
+promote-to-staging:
+  stage: promote
+  image: alpine:3.17
+  only:
+    - dev
+  needs:
+    - job: commit-gitops-dev
+      optional: true
+
+  before_script:
+    - apk add --no-cache curl jq
+
+  script:
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    - export IMAGE_TAG="dev-${SHORT_SHA}"
+    - export MR_TITLE="🚀 Promote dev ${IMAGE_TAG} to staging"
+    - 'export MR_DESCRIPTION="Automated promotion from dev to staging%0A%0AChanges:%0A- Backend/Frontend images: ${IMAGE_TAG}%0A- Commit: ${CI_COMMIT_SHA}"'
+    - |
+      echo "Creating Merge Request: dev -> staging"
+      RESPONSE=$(curl --silent --request POST \
+        --header "PRIVATE-TOKEN: ${GIT_TOKEN}" \
+        --data "source_branch=dev" \
+        --data "target_branch=staging" \
+        --data "title=${MR_TITLE}" \
+        --data "description=${MR_DESCRIPTION}" \
+        --data "remove_source_branch=false" \
+        "https://gitlab.kiv.zcu.cz/api/v4/projects/${CI_PROJECT_ID}/merge_requests")
+      
+      MR_URL=$(echo $RESPONSE | jq -r '.web_url // empty')
+      
+      if [ -n "$MR_URL" ]; then
+        echo "✅ Merge Request created successfully!"
+        echo "MR URL: $MR_URL"
+      else
+        echo "ℹ️ MR might already exist or error occurred"
+        echo "Check manually: https://gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops/-/merge_requests"
+      fi
+
+  allow_failure: true

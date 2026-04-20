@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: voting-system-prod-gitlab
+  namespace: argocd
+  labels:
+    environment: production
+    source: gitlab
+spec:
+  project: default
+  
+  source:
+    repoURL: https://gitlab.kiv.zcu.cz/zaverecne-prace/voting-system-gitops.git
+    targetRevision: main
+    path: charts/voting-system
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  
+  syncPolicy:
+    # Manual sync for production - no automated deployment!
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
