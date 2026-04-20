@@ -27,7 +27,7 @@ DB_NAME = os.getenv("DB_NAME", "poll_app")
 DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
 DATABASE_URL = (
     f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    f"?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
+    f"?sslmode=disable&options=-csearch_path={DB_SCHEMA}"
 )
 
 # Переопределяем sqlalchemy.url из переменных окружения
