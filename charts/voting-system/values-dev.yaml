@@ -13,11 +13,11 @@ backend:
   
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: "100Mi"
+      cpu: "50m"
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: "200Mi"
+      cpu: "50m"
 
 frontend:
   replicaCount: 1  # Single replica for dev
@@ -28,11 +28,11 @@ frontend:
   
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: "100Mi"
+      cpu: "20m"
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: "200Mi"
+      cpu: "50m"
 
   livenessProbe:
     enabled: true
@@ -55,10 +55,10 @@ cockroachdb:
   resources:
     requests:
       memory: "512Mi"
-      cpu: "250m"
+      cpu: "50m"
     limits:
-      memory: "1Gi"
-      cpu: "1000m"
+      memory: "800Mi"
+      cpu: "50m"
   
   persistence:
     size: 2Gi

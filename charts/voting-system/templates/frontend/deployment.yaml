@@ -8,17 +8,20 @@ metadata:
     app: {{ .Values.frontend.name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
+    version: {{ .Values.frontend.image.tag }}
 spec:
   replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Values.frontend.name }}
       release: {{ .Release.Name }}
+      version: {{ .Values.frontend.image.tag }}
   template:
     metadata:
       labels:
         app: {{ .Values.frontend.name }}
         release: {{ .Release.Name }}
+        version: {{ .Values.frontend.image.tag }}
     spec:
       containers:
       - name: {{ .Values.frontend.name }}

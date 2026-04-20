@@ -8,6 +8,7 @@ metadata:
     app: {{ .Values.cockroachdb.name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
+    version: {{ .Values.cockroachdb.image.tag }}
 spec:
   serviceName: {{ .Values.cockroachdb.name }}
   replicas: {{ .Values.cockroachdb.replicaCount }}
@@ -15,11 +16,13 @@ spec:
     matchLabels:
       app: {{ .Values.cockroachdb.name }}
       release: {{ .Release.Name }}
+      version: {{ .Values.cockroachdb.image.tag }}
   template:
     metadata:
       labels:
         app: {{ .Values.cockroachdb.name }}
         release: {{ .Release.Name }}
+        version: {{ .Values.cockroachdb.image.tag }}
     spec:
       containers:
       - name: {{ .Values.cockroachdb.name }}
