@@ -18,14 +18,6 @@ spec:
       containers:
       - name: init-db
         image: "{{ .Values.cockroachdb.image.repository }}:{{ .Values.cockroachdb.image.tag }}"
-        env:
-        {{- range .Values.schemas }}
-        - name: DB_PASSWORD_{{ .name | upper }}
-          valueFrom:
-            secretKeyRef:
-              name: {{ $.Release.Name }}-db-users
-              key: password-{{ .name }}
-        {{- end }}
         command:
           - "sh"
           - "-c"
@@ -49,7 +41,6 @@ spec:
               --execute="
                 CREATE SCHEMA IF NOT EXISTS {{ .name }};
                 CREATE USER IF NOT EXISTS app_{{ .name }};
-                ALTER USER app_{{ .name }} WITH PASSWORD '$(DB_PASSWORD_{{ .name | upper }})';
                 GRANT CONNECT ON DATABASE {{ $.Values.database.name }} TO app_{{ .name }};
                 GRANT USAGE, CREATE ON SCHEMA {{ .name }} TO app_{{ .name }};
                 GRANT ALL ON ALL TABLES IN SCHEMA {{ .name }} TO app_{{ .name }};

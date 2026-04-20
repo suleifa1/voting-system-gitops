@@ -9,18 +9,14 @@ import os
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "26257")
 DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_NAME = os.getenv("DB_NAME", "poll_app")
 DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
 
-# Build credentials part: user:password@ or just user@ if no password
-_credentials = f"{DB_USER}:{DB_PASSWORD}@" if DB_PASSWORD else f"{DB_USER}@"
-
 # URL для psycopg2 async (поддерживается CockroachDB)
-ASYNC_DATABASE_URL = f"postgresql+psycopg://{_credentials}{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
+ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
 
 # URL для psycopg2 (с sslmode для Alembic)
-SYNC_DATABASE_URL = f"postgresql+psycopg2://{_credentials}{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
+SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
 
 
 import sqlalchemy.dialects.postgresql.base as pg_base

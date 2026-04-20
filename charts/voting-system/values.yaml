@@ -186,7 +186,6 @@ configMap:
 secret:
   SECRET_KEY: "PLACEHOLDER_OVERRIDE_THIS_VALUE"
   DB_USER: "root"          # Override per env: app_dev / app_staging / app_prod
-  DB_PASSWORD: ""          # Override per env with real password
 
 # Init DB job (creates database before migrations)
 initDbJob:

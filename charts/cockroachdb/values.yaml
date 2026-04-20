@@ -31,15 +31,10 @@ cockroachdb:
     COCKROACH_CHANNEL: "kubernetes-insecure"
 
 # Список схем которые нужно создать при инициализации
-# password: пароль для пользователя app_<name>
-# ВАЖНО: для прода переопределить через --set или SealedSecret
 schemas:
   - name: dev
-    password: "dev-db-password-change-me"
   - name: staging
-    password: "staging-db-password-change-me"
   - name: prod
-    password: "prod-db-password-change-me"
 
 database:
   name: poll_app

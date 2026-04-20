@@ -23,12 +23,10 @@ config = context.config
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "26257")
 DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_NAME = os.getenv("DB_NAME", "poll_app")
 DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
-_credentials = f"{DB_USER}:{DB_PASSWORD}@" if DB_PASSWORD else f"{DB_USER}@"
 DATABASE_URL = (
-    f"postgresql+psycopg2://{_credentials}{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     f"?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
 )
 
