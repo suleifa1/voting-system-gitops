@@ -8,7 +8,7 @@ backend:
   replicaCount: 2
   
   image:
-    tag: staging-bfd3b80
+    tag: staging-e22f203
     pullPolicy: Always
   
   resources:
