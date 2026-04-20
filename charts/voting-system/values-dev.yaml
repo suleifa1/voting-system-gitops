@@ -20,13 +20,13 @@ backend:
       cpu: "50m"
   livenessProbe:
     enabled: true
-    path: /dev/api/health
+    path: /api/health
     initialDelaySeconds: 30
     periodSeconds: 10
   
   readinessProbe:
     enabled: true
-    path: /dev/api/health
+    path: /api/health
     initialDelaySeconds: 10
     periodSeconds: 5
 
