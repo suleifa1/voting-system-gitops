@@ -52,12 +52,13 @@ frontend:
 cockroachdb:
   enabled: false  # Moved to separate cockroachdb chart in namespace database
 
-# ExternalName Service pointing to CockroachDB in database namespace
-database:
-  externalService:
+# Istio ServiceEntry - resolves CockroachDB from namespace database
+serviceEntry:
+  database:
     enabled: true
-    host: cockroachdb.database.svc.cluster.local
+    host: "database"
     port: 26257
+    address: cockroachdb.database.svc.cluster.local
 
 # initDbJob and migrateJob moved to cockroachdb ArgoCD app
 initDbJob:

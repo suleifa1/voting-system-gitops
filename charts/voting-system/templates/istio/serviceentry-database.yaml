@@ -1,0 +1,23 @@
+{{- if .Values.serviceEntry.database.enabled }}
+# ServiceEntry - Istio-native способ резолвить CockroachDB из другого namespace.
+# Envoy sidecar перехватывает трафик на хост "database:26257"
+# и форвардит на cockroachdb.database.svc.cluster.local
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: database
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+    - {{ .Values.serviceEntry.database.host }}
+  ports:
+    - number: {{ .Values.serviceEntry.database.port }}
+      name: tcp-postgresql
+      protocol: TCP
+  resolution: DNS
+  endpoints:
+    - address: {{ .Values.serviceEntry.database.address }}
+{{- end }}

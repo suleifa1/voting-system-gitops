@@ -163,9 +163,17 @@ ingress:
   #    hosts:
   #      - voting.local
 
+# Istio ServiceEntry - резолвит CockroachDB из namespace database
+serviceEntry:
+  database:
+    enabled: false  # Enable in environment-specific values (not needed if cockroachdb.enabled=true)
+    host: "database"           # имя хоста которое используют backend/migrate (DB_HOST)
+    port: 26257
+    address: cockroachdb.database.svc.cluster.local
+
 # ConfigMap data
 configMap:
-  DB_HOST: "cockroachdb"
+  DB_HOST: "database"
   DB_PORT: "26257"
   DB_USER: "root"
   DB_NAME: "poll_app"
