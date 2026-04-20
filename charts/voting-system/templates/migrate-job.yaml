@@ -37,5 +37,10 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config
+        env:
+        - name: DB_HOST
+          value: {{ .Values.backend.env.DB_HOST | default "database" | quote }}
+        - name: DB_SCHEMA
+          value: {{ .Values.global.namespace | quote }}
 
 {{- end }}

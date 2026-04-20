@@ -35,13 +35,13 @@ backend:
   livenessProbe:
     enabled: true
     path: /api/health
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 10
   
   readinessProbe:
     enabled: true
     path: /api/health
-    initialDelaySeconds: 10
+    initialDelaySeconds: 60
     periodSeconds: 5
   
   env:
@@ -163,21 +163,29 @@ ingress:
   #    hosts:
   #      - voting.local
 
-# ConfigMap data
+# Istio ServiceEntry - резолвит CockroachDB из namespace database
+serviceEntry:
+  database:
+    enabled: false  # Enable in environment-specific values (not needed if cockroachdb.enabled=true)
+    host: "database"           # имя хоста которое используют backend/migrate (DB_HOST)
+    port: 26257
+    address: cockroachdb.database.svc.cluster.local
+
+# ConfigMap data (non-sensitive)
 configMap:
-  DB_HOST: "cockroachdb"
+  DB_HOST: "database"
   DB_PORT: "26257"
-  DB_USER: "root"
   DB_NAME: "poll_app"
   COCKROACH_DATABASE: "poll_app"
 
-# Secret data (base values - override in environment-specific files)
+# Secret data (sensitive - override in environment-specific files or use SealedSecret)
 # WARNING: These are PLACEHOLDER values. Override with real secrets via:
 # - Sealed Secrets (recommended for GitOps)
 # - External Secrets Operator
 # - Manual kubectl create secret
 secret:
   SECRET_KEY: "PLACEHOLDER_OVERRIDE_THIS_VALUE"
+  DB_USER: "root"          # Override per env: app_dev / app_staging / app_prod
 
 # Init DB job (creates database before migrations)
 initDbJob:

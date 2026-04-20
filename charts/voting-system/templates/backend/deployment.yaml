@@ -22,6 +22,12 @@ spec:
         app: {{ .Values.backend.name }}
         release: {{ .Release.Name }}
         version: {{ .Values.backend.image.tag }}
+      annotations:
+        # Enable Istio DNS Proxying so ServiceEntry hostnames are resolvable via Envoy
+        proxy.istio.io/config: |
+          proxyMetadata:
+            ISTIO_META_DNS_CAPTURE: "true"
+            ISTIO_META_DNS_AUTO_ALLOCATE: "true"
     spec:
       containers:
       - name: {{ .Values.backend.name }}
@@ -43,6 +49,8 @@ spec:
         env:
         - name: PYTHONPATH
           value: {{ .Values.backend.env.PYTHONPATH | quote }}
+        - name: DB_SCHEMA
+          value: {{ .Values.global.namespace | quote }}
         resources:
           {{- toYaml .Values.backend.resources | nindent 10 }}
         {{- if .Values.backend.livenessProbe.enabled }}

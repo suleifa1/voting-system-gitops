@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cockroachdb
+description: CockroachDB standalone chart for database namespace
+type: application
+version: 0.1.0
+appVersion: "v23.1.0"

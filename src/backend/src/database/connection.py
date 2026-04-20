@@ -4,16 +4,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
+# DB connection supports per-env users (app_dev/app_staging/app_prod) with password auth
+
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "26257")
 DB_USER = os.getenv("DB_USER", "root")
 DB_NAME = os.getenv("DB_NAME", "poll_app")
+DB_SCHEMA = os.getenv("DB_SCHEMA", "public")
 
 # URL для psycopg2 async (поддерживается CockroachDB)
-ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
+ASYNC_DATABASE_URL = f"postgresql+psycopg://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
 
 # URL для psycopg2 (с sslmode для Alembic)
-SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
+SYNC_DATABASE_URL = f"postgresql+psycopg2://{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable&options=-csearch_path%3D{DB_SCHEMA}"
 
 
 import sqlalchemy.dialects.postgresql.base as pg_base

@@ -1,0 +1,50 @@
+{{- range .Values.migrations }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-{{ .schema }}
+  namespace: {{ $.Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: migrate-{{ .schema }}
+        image: "{{ .image }}"
+        imagePullPolicy: Always
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "Waiting for CockroachDB..."
+            until python -c "
+            import psycopg
+            psycopg.connect('postgresql://root@{{ $.Values.cockroachdb.name }}.{{ $.Values.global.namespace }}.svc.cluster.local:26257/{{ $.Values.database.name }}?sslmode=disable')
+            " 2>/dev/null; do
+              echo "DB not ready, retrying in 5s..."
+              sleep 5
+            done
+            echo "Running migrations for schema {{ .schema }}..."
+            alembic upgrade head
+            echo "Migrations for {{ .schema }} completed!"
+        env:
+        - name: DB_HOST
+          value: "{{ $.Values.cockroachdb.name }}.{{ $.Values.global.namespace }}.svc.cluster.local"
+        - name: DB_PORT
+          value: "{{ $.Values.cockroachdb.service.grpcPort }}"
+        - name: DB_USER
+          value: "app_{{ .schema }}"
+        - name: DB_NAME
+          value: "{{ $.Values.database.name }}"
+        - name: DB_SCHEMA
+          value: "{{ .schema }}"
+{{- end }}

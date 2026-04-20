@@ -1,0 +1,48 @@
+global:
+  namespace: database
+
+cockroachdb:
+  name: cockroachdb
+  replicaCount: 1
+
+  image:
+    repository: cockroachdb/cockroach
+    tag: v23.1.0
+    pullPolicy: IfNotPresent
+
+  service:
+    grpcPort: 26257
+    httpPort: 8080
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+
+  env:
+    COCKROACH_CHANNEL: "kubernetes-insecure"
+
+# Список схем которые нужно создать при инициализации
+schemas:
+  - name: dev
+  - name: staging
+  - name: prod
+
+database:
+  name: poll_app
+
+# Миграции Alembic для каждой схемы
+# image - backend образ с alembic внутри
+migrations:
+  - schema: dev
+    image: ghcr.io/suleifa1/backend:dev-9bd53c4
+  - schema: staging
+    image: ghcr.io/suleifa1/backend:staging-bfd3b80

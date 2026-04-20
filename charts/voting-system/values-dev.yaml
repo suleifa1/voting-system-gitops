@@ -8,7 +8,7 @@ backend:
   replicaCount: 1  # Single replica for dev
   
   image:
-    tag: dev-8f20f92
+    tag: dev-9bd53c4
     pullPolicy: Always
   
   resources:
@@ -50,18 +50,22 @@ frontend:
     NODE_ENV: "development"
 
 cockroachdb:
-  replicaCount: 1
-  
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "50m"
-    limits:
-      memory: "800Mi"
-      cpu: "50m"
-  
-  persistence:
-    size: 2Gi
+  enabled: false  # Moved to separate cockroachdb chart in namespace database
+
+# Istio ServiceEntry - resolves CockroachDB from namespace database
+serviceEntry:
+  database:
+    enabled: true
+    host: "database"
+    port: 26257
+    address: cockroachdb.database.svc.cluster.local
+
+# initDbJob and migrateJob moved to cockroachdb ArgoCD app
+initDbJob:
+  enabled: false
+
+migrateJob:
+  enabled: false
 
 ingress:
   enabled: false
@@ -74,3 +78,4 @@ istio:
 
 secret:
   SECRET_KEY: "dev-secret-key-not-for-production"
+  DB_USER: "app_dev"

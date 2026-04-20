@@ -51,18 +51,22 @@ frontend:
     NEXT_PUBLIC_BASE_PATH: "/staging"
 
 cockroachdb:
-  replicaCount: 1
+  enabled: false  # Moved to separate cockroachdb chart in namespace database
 
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "50m"
-    limits:
-      memory: "800Mi"
-      cpu: "50m"
+# Istio ServiceEntry - resolves CockroachDB from namespace database
+serviceEntry:
+  database:
+    enabled: true
+    host: "database"
+    port: 26257
+    address: cockroachdb.database.svc.cluster.local
 
-  persistence:
-    size: 5Gi
+# initDbJob and migrateJob moved to cockroachdb ArgoCD app
+initDbJob:
+  enabled: false
+
+migrateJob:
+  enabled: false
 
 ingress:
   enabled: false
@@ -76,3 +80,4 @@ istio:
 # Staging secrets - USE SEALED SECRETS OR EXTERNAL SECRETS
 secret:
   SECRET_KEY: "STAGING_PLACEHOLDER_USE_SEALED_SECRETS"
+  DB_USER: "app_staging"
