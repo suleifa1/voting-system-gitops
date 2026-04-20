@@ -52,7 +52,15 @@ frontend:
 
 cockroachdb:
   replicaCount: 1
-  
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Gi"
+      cpu: "200m"
+
   persistence:
     size: 5Gi
 
