@@ -59,6 +59,13 @@ database:
     host: cockroachdb.database.svc.cluster.local
     port: 26257
 
+# initDbJob and migrateJob moved to cockroachdb ArgoCD app
+initDbJob:
+  enabled: false
+
+migrateJob:
+  enabled: false
+
 ingress:
   enabled: false
 

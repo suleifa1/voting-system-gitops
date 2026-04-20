@@ -38,3 +38,11 @@ schemas:
 
 database:
   name: poll_app
+
+# Миграции Alembic для каждой схемы
+# image - backend образ с alembic внутри
+migrations:
+  - schema: dev
+    image: ghcr.io/suleifa1/backend:dev-latest
+  - schema: staging
+    image: ghcr.io/suleifa1/backend:staging-latest
