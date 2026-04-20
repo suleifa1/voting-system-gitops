@@ -33,6 +33,18 @@ frontend:
     limits:
       memory: "512Mi"
       cpu: "500m"
+
+  livenessProbe:
+    enabled: true
+    path: /staging/
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /staging/
+    initialDelaySeconds: 10
+    periodSeconds: 5
   
   env:
     NODE_ENV: "production"

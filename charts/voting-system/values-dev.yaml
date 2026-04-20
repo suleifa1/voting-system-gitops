@@ -48,7 +48,6 @@ frontend:
   
   env:
     NODE_ENV: "development"
-    NEXT_PUBLIC_BASE_PATH: "/dev"
 
 cockroachdb:
   replicaCount: 1

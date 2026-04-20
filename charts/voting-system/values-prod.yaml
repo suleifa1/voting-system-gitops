@@ -33,6 +33,18 @@ frontend:
     limits:
       memory: "1Gi"
       cpu: "1000m"
+
+  livenessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 5
   
   env:
     NODE_ENV: "production"
