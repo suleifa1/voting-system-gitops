@@ -35,13 +35,13 @@ backend:
   livenessProbe:
     enabled: true
     path: /api/health
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 10
   
   readinessProbe:
     enabled: true
     path: /api/health
-    initialDelaySeconds: 10
+    initialDelaySeconds: 60
     periodSeconds: 5
   
   env:

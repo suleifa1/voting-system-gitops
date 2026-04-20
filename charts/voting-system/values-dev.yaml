@@ -18,17 +18,6 @@ backend:
     limits:
       memory: "200Mi"
       cpu: "50m"
-  livenessProbe:
-    enabled: true
-    path: /api/health
-    initialDelaySeconds: 30
-    periodSeconds: 10
-  
-  readinessProbe:
-    enabled: true
-    path: /api/health
-    initialDelaySeconds: 10
-    periodSeconds: 5
 
 frontend:
   replicaCount: 1  # Single replica for dev
