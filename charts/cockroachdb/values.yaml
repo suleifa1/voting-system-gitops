@@ -45,4 +45,4 @@ migrations:
   - schema: dev
     image: ghcr.io/suleifa1/backend:dev-9bd53c4
   - schema: staging
-    image: ghcr.io/suleifa1/backend:staging-bfd3b80
+    image: ghcr.io/suleifa1/backend:staging-e22f203
