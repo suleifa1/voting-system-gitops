@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-init-db
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: init-db
+        image: "{{ .Values.cockroachdb.image.repository }}:{{ .Values.cockroachdb.image.tag }}"
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "Waiting for CockroachDB to be ready..."
+            until cockroach sql --insecure --host={{ .Values.cockroachdb.name }}.{{ .Values.global.namespace }}.svc.cluster.local --execute="SELECT 1;" 2>/dev/null; do
+              echo "CockroachDB not ready, retrying in 5s..."
+              sleep 5
+            done
+
+            echo "Creating database {{ .Values.database.name }}..."
+            cockroach sql --insecure \
+              --host={{ .Values.cockroachdb.name }}.{{ .Values.global.namespace }}.svc.cluster.local \
+              --execute="CREATE DATABASE IF NOT EXISTS {{ .Values.database.name }};"
+
+            {{- range .Values.schemas }}
+            echo "Creating schema {{ .name }}..."
+            cockroach sql --insecure \
+              --host={{ $.Values.cockroachdb.name }}.{{ $.Values.global.namespace }}.svc.cluster.local \
+              --database={{ $.Values.database.name }} \
+              --execute="CREATE SCHEMA IF NOT EXISTS {{ .name }};"
+            echo "Schema {{ .name }} ready!"
+            {{- end }}
+
+            echo "All schemas initialized!"

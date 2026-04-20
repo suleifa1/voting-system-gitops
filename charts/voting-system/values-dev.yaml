@@ -50,18 +50,14 @@ frontend:
     NODE_ENV: "development"
 
 cockroachdb:
-  replicaCount: 1
-  
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "50m"
-    limits:
-      memory: "800Mi"
-      cpu: "50m"
-  
-  persistence:
-    size: 2Gi
+  enabled: false  # Moved to separate cockroachdb chart in namespace database
+
+# ExternalName Service pointing to CockroachDB in database namespace
+database:
+  externalService:
+    enabled: true
+    host: cockroachdb.database.svc.cluster.local
+    port: 26257
 
 ingress:
   enabled: false

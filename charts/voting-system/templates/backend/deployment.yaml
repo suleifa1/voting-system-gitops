@@ -43,6 +43,10 @@ spec:
         env:
         - name: PYTHONPATH
           value: {{ .Values.backend.env.PYTHONPATH | quote }}
+        - name: DB_HOST
+          value: {{ .Values.backend.env.DB_HOST | default "database" | quote }}
+        - name: DB_SCHEMA
+          value: {{ .Values.global.namespace | quote }}
         resources:
           {{- toYaml .Values.backend.resources | nindent 10 }}
         {{- if .Values.backend.livenessProbe.enabled }}

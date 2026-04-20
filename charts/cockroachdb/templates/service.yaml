@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cockroachdb.name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.cockroachdb.name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - name: tcp-postgresql
+    port: {{ .Values.cockroachdb.service.grpcPort }}
+    targetPort: tcp-postgresql
+  - name: http
+    port: {{ .Values.cockroachdb.service.httpPort }}
+    targetPort: http
+  selector:
+    app: {{ .Values.cockroachdb.name }}
+    release: {{ .Release.Name }}
