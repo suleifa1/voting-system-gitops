@@ -23,7 +23,7 @@ frontend:
   replicaCount: 2
   
   image:
-    tag: staging-4db5e03
+    tag: staging-bfd3b80
     pullPolicy: Always
   
   resources:
