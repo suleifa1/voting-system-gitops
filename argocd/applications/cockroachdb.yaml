@@ -10,7 +10,7 @@ spec:
 
   source:
     repoURL: https://github.com/suleifa1/voting-system-gitops
-    targetRevision: dev
+    targetRevision: staging
     path: charts/cockroachdb
     helm:
       valueFiles:
