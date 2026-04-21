@@ -136,7 +136,6 @@ ingress:
   className: "nginx"
   
   # NodePort service for Ingress Controller
-  # Отключен по умолчанию, так как используется MetalLB LoadBalancer
   # Включить только если нет LoadBalancer (minikube, kind, etc.)
   nodePort:
     enabled: false

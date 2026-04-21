@@ -43,6 +43,6 @@ database:
 # image - backend образ с alembic внутри
 migrations:
   - schema: dev
-    image: ghcr.io/suleifa1/backend:dev-9bd53c4
+    image: ghcr.io/suleifa1/backend:staging-e22f203
   - schema: staging
     image: ghcr.io/suleifa1/backend:staging-e22f203
